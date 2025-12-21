@@ -300,10 +300,10 @@ const AdminPage: React.FC<AdminPageProps> = ({
       <section className="bg-slate-950 p-6 rounded-xl border border-slate-800 shadow-inner">
         <h3 className="text-slate-500 text-xs font-bold orbitron mb-4">SYSTEM CONSOLE LOG</h3>
         <div className="font-mono text-[10px] text-green-500 space-y-1">
-          <p>> Admin Logged In: {new Date().toLocaleTimeString()}</p>
-          <p>> System Security: AES-256 (Industrial Standard)</p>
-          <p>> Sync Status: LocalStorage Persistent</p>
-          <p>> Version: 1.0.4-industrial-gold</p>
+          <p>{'>'} Admin Logged In: {new Date().toLocaleTimeString()}</p>
+          <p>{'>'} System Security: AES-256 (Industrial Standard)</p>
+          <p>{'>'} Sync Status: LocalStorage Persistent</p>
+          <p>{'>'} Version: 1.0.4-industrial-gold</p>
         </div>
       </section>
     </div>
