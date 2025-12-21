@@ -1,20 +1,27 @@
 
 import React, { useState } from 'react';
 import { Shifts, Employee } from '../types';
+import { NotificationConfig } from '../App';
 
 interface ScheduleProps {
   shifts: Shifts;
   employees: Employee[];
-  notification: string;
+  notification: NotificationConfig;
+  rosterMonth: number;
+  rosterYear: number;
 }
 
-const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification }) => {
+const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification, rosterMonth, rosterYear }) => {
   const [searchQuery, setSearchQuery] = useState('');
   
-  const daysInJan = Array.from({ length: 31 }, (_, i) => i + 1);
-  const weekDays = ["THU", "FRI", "SAT", "SUN", "MON", "TUE", "WED"];
+  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const daysInMonth = new Date(rosterYear, rosterMonth + 1, 0).getDate();
+  const dayArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   
+  // Logic for week days (simplified for 2026 start pattern)
+  const weekDays = ["THU", "FRI", "SAT", "SUN", "MON", "TUE", "WED"];
   const getDayLabel = (day: number) => {
+    // This is a relative calculation for visual consistency
     return weekDays[(day - 1) % 7];
   };
 
@@ -23,27 +30,33 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
     e.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const ShiftCard = ({ label, data }: { label: string, data: typeof shifts.A }) => (
-    <div className="brushed-metal border border-slate-500/50 rounded-xl p-6 shadow-2xl relative group overflow-hidden">
-      <div className="absolute top-0 right-0 p-2 text-[10px] text-slate-500 orbitron uppercase font-bold tracking-tighter">SHFT_{label}</div>
-      <h3 className="text-xl font-bold mb-4 text-slate-200 orbitron border-b border-slate-700 pb-2">Shift {label}</h3>
-      <div className="space-y-3">
-        <div>
-          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Supervisor</p>
-          <p className="font-bold text-lg text-slate-100">{data.supervisor}</p>
+  const ShiftCard = ({ label, data }: { label: string, data: typeof shifts.A }) => {
+    const labels = label === 'General' 
+      ? { s: 'Supervisor', c1: 'Incharge', c2: 'Operator' }
+      : { s: 'Supervisor', c1: 'Chipper 1 Operator', c2: 'Chipper 2 Operator' };
+
+    return (
+      <div className="brushed-metal border border-slate-500/50 rounded-xl p-6 shadow-2xl relative group overflow-hidden">
+        <div className="absolute top-0 right-0 p-2 text-[10px] text-slate-500 orbitron uppercase font-bold tracking-tighter">SHFT_{label}</div>
+        <h3 className="text-xl font-bold mb-4 text-slate-200 orbitron border-b border-slate-700 pb-2">Shift {label}</h3>
+        <div className="space-y-3">
+          <div>
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{labels.s}</p>
+            <p className="font-bold text-lg text-slate-100">{data.supervisor || 'None'}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{labels.c1}</p>
+            <p className="text-slate-300 text-sm">{data.chipper1 || 'None'}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{labels.c2}</p>
+            <p className="text-slate-300 text-sm">{data.chipper2 || 'None'}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Chipper 1 Operator</p>
-          <p className="text-slate-300 text-sm">{data.chipper1}</p>
-        </div>
-        <div>
-          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Chipper 2 Operator</p>
-          <p className="text-slate-300 text-sm">{data.chipper2}</p>
-        </div>
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
       </div>
-      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-    </div>
-  );
+    );
+  };
 
   const renderRosterGroup = (startIndex: number, endIndex: number) => {
     return employees.slice(startIndex, endIndex).map((emp, idx) => (
@@ -51,8 +64,10 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
         <td className="p-2 border border-slate-700 text-center font-bold text-slate-400">{startIndex + idx + 1}</td>
         <td className="p-2 border border-slate-700 font-bold text-slate-100 whitespace-nowrap min-w-[180px]">{emp.name}</td>
         <td className="p-2 border border-slate-700 font-mono text-xs text-slate-400">{emp.id}</td>
-        <td className="p-2 border border-slate-700 text-center text-[10px] font-bold text-slate-500">{getDayLabel(emp.schedule?.indexOf('R') ? emp.schedule.indexOf('R') + 1 : 1)}</td>
-        {daysInJan.map((day) => {
+        <td className="p-2 border border-slate-700 text-center text-[10px] font-bold text-slate-500">
+           {emp.schedule?.includes('R') ? getDayLabel(emp.schedule.indexOf('R') + 1) : '-'}
+        </td>
+        {dayArray.map((day) => {
           const shift = emp.schedule?.[day - 1] || '-';
           const isRest = shift === 'R';
           return (
@@ -73,7 +88,6 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
 
   return (
     <div className="space-y-8 py-4 animate-fadeIn">
-      {/* Shift Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <ShiftCard label="A" data={shifts.A} />
         <ShiftCard label="B" data={shifts.B} />
@@ -81,11 +95,12 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
         <ShiftCard label="General" data={shifts.General} />
       </div>
 
-      {/* Notification Bar */}
       <div className="bg-red-700/80 border-y border-red-500 p-2 overflow-hidden whitespace-nowrap shadow-[0_0_20px_rgba(239,68,68,0.4)] relative">
         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-red-700 to-transparent z-10"></div>
-        <div className="animate-marquee inline-block text-white font-black orbitron uppercase tracking-widest text-xs">
-          {notification} • {notification} • {notification}
+        <div className="animate-marquee inline-block text-white uppercase tracking-widest">
+          <span className={`${notification.font} ${notification.size}`}>
+            {notification.text} • {notification.text} • {notification.text}
+          </span>
         </div>
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-red-700 to-transparent z-10"></div>
       </div>
@@ -111,50 +126,40 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
         }
       `}</style>
 
-      {/* Monthly Roster - Exact Image Replica */}
       <section className="brushed-metal p-1 rounded-xl border border-slate-600/50 shadow-2xl overflow-hidden">
         <div className="bg-slate-900/80 p-4 border-b border-slate-700 text-center">
           <h2 className="text-xl font-black orbitron tracking-[0.3em] text-white">
-            CHIPPER SHIFT SCHEDULE : -- JAN - 2026
+            CHIPPER SHIFT SCHEDULE : -- {months[rosterMonth]} - {rosterYear}
           </h2>
         </div>
         
         <div className="overflow-x-auto roster-scrollbar">
           <table className="w-full text-xs border-collapse bg-black/30">
             <thead>
-              {/* Row 1: Dates */}
               <tr className="bg-slate-800/80 text-white font-bold">
                 <th rowSpan={2} className="p-2 border border-slate-700 min-w-[40px]">S.N</th>
                 <th rowSpan={2} className="p-2 border border-slate-700 text-left min-w-[180px]">Emp. Name</th>
                 <th rowSpan={2} className="p-2 border border-slate-700 min-w-[100px]">Emp. ID</th>
                 <th className="p-1 border border-slate-700 text-[9px] uppercase">Date</th>
-                {daysInJan.map(d => (
+                {dayArray.map(d => (
                   <th key={d} className="p-1 border border-slate-700 min-w-[32px] text-[10px]">{d}</th>
                 ))}
                 <th rowSpan={2} className="p-2 border border-slate-700 min-w-[120px]">Phone No</th>
               </tr>
-              {/* Row 2: Days of week */}
               <tr className="bg-slate-800/40 text-slate-400 font-bold">
                 <th className="p-1 border border-slate-700 text-[8px] uppercase tracking-tighter">Rest</th>
-                {daysInJan.map(d => (
+                {dayArray.map(d => (
                   <th key={d} className="p-1 border border-slate-700 text-[8px]">{getDayLabel(d)}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {/* Group 1 */}
               {renderRosterGroup(0, 7)}
-              {/* Spacing Row */}
-              <tr className="h-4 bg-slate-900/50"><td colSpan={36}></td></tr>
-              {/* Group 2 */}
+              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
               {renderRosterGroup(7, 9)}
-              {/* Spacing Row */}
-              <tr className="h-4 bg-slate-900/50"><td colSpan={36}></td></tr>
-              {/* Group 3 */}
+              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
               {renderRosterGroup(9, 13)}
-              {/* Spacing Row */}
-              <tr className="h-4 bg-slate-900/50"><td colSpan={36}></td></tr>
-              {/* Group 4 (Incharge) */}
+              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
               {renderRosterGroup(13, 14)}
             </tbody>
           </table>
@@ -167,7 +172,6 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
         </div>
       </section>
 
-      {/* Search Section */}
       <section className="brushed-metal p-6 rounded-xl border border-slate-600/50">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <h2 className="text-2xl font-bold orbitron text-slate-200">Employee Quick-Look</h2>
