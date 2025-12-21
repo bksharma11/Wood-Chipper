@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Page, Employee, Shifts } from './types';
+import { Page, Employee, Shifts, DailyShifts } from './types';
 import { INITIAL_EMPLOYEES, INITIAL_SHIFTS } from './constants';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -9,31 +9,86 @@ import SchedulePage from './pages/Schedule';
 import ProductionPage from './pages/Production';
 import LabourPage from './pages/Labour';
 import AdminPage from './pages/Admin';
+import { db } from './firebase';
+import { ref, onValue } from 'firebase/database';
+
+export interface NotificationConfig {
+  text: string;
+  font: string;
+  size: string;
+}
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Schedule);
-  const [employees, setEmployees] = useState<Employee[]>(() => {
-    const saved = localStorage.getItem('plant_employees');
-    return saved ? JSON.parse(saved) : INITIAL_EMPLOYEES;
+  const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
+  const [dailyShiftHistory, setDailyShiftHistory] = useState<DailyShifts>({});
+  const [notification, setNotification] = useState<NotificationConfig>({
+    text: "Welcome to CROSSBOND Plant Management System. Safety First!",
+    font: "orbitron",
+    size: "text-xs"
   });
-  const [shifts, setShifts] = useState<Shifts>(() => {
-    const saved = localStorage.getItem('plant_shifts');
-    return saved ? JSON.parse(saved) : INITIAL_SHIFTS;
-  });
-  const [notification, setNotification] = useState("Welcome to CROSSBOND Plant Management System. Safety First!");
+  const [rosterMonth, setRosterMonth] = useState<number>(0);
+  const [rosterYear, setRosterYear] = useState<number>(2026);
 
+  // Sync state with Firebase Realtime Database
   useEffect(() => {
-    localStorage.setItem('plant_employees', JSON.stringify(employees));
-  }, [employees]);
+    const employeesRef = ref(db, 'employees');
+    const shiftsRef = ref(db, 'dailyShiftHistory');
+    const notificationRef = ref(db, 'notification');
+    const monthRef = ref(db, 'rosterMonth');
+    const yearRef = ref(db, 'rosterYear');
 
-  useEffect(() => {
-    localStorage.setItem('plant_shifts', JSON.stringify(shifts));
-  }, [shifts]);
+    const unsubEmployees = onValue(employeesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) setEmployees(data);
+    });
+
+    const unsubShifts = onValue(shiftsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) setDailyShiftHistory(data);
+    });
+
+    const unsubNotification = onValue(notificationRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) setNotification(data);
+    });
+
+    const unsubMonth = onValue(monthRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data !== null) setRosterMonth(data);
+    });
+
+    const unsubYear = onValue(yearRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data !== null) setRosterYear(data);
+    });
+
+    return () => {
+      unsubEmployees();
+      unsubShifts();
+      unsubNotification();
+      unsubMonth();
+      unsubYear();
+    };
+  }, []);
+
+  const getEffectiveShifts = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return dailyShiftHistory[today] || INITIAL_SHIFTS;
+  };
 
   const renderPage = () => {
     switch (currentPage) {
       case Page.Schedule:
-        return <SchedulePage shifts={shifts} employees={employees} notification={notification} />;
+        return (
+          <SchedulePage 
+            shifts={getEffectiveShifts()} 
+            employees={employees} 
+            notification={notification} 
+            rosterMonth={rosterMonth}
+            rosterYear={rosterYear}
+          />
+        );
       case Page.Production:
         return <ProductionPage employees={employees} />;
       case Page.Labour:
@@ -42,15 +97,22 @@ const App: React.FC = () => {
         return (
           <AdminPage 
             employees={employees} 
-            setEmployees={setEmployees} 
-            shifts={shifts} 
-            setShifts={setShifts} 
+            dailyShiftHistory={dailyShiftHistory}
             notification={notification}
-            setNotification={setNotification}
+            rosterMonth={rosterMonth}
+            rosterYear={rosterYear}
           />
         );
       default:
-        return <SchedulePage shifts={shifts} employees={employees} notification={notification} />;
+        return (
+          <SchedulePage 
+            shifts={getEffectiveShifts()} 
+            employees={employees} 
+            notification={notification} 
+            rosterMonth={rosterMonth}
+            rosterYear={rosterYear}
+          />
+        );
     }
   };
 

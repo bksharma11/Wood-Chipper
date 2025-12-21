@@ -15,7 +15,6 @@ export interface HistoryEntry {
   reason: string;
 }
 
-// Added missing LabourEntry interface
 export interface LabourEntry {
   name: string;
   inTime: string;
@@ -36,6 +35,8 @@ export interface Shifts {
   C: ShiftData;
   General: ShiftData;
 }
+
+export type DailyShifts = Record<string, Shifts>;
 
 export enum Page {
   Schedule = 'Schedule',
