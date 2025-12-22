@@ -30,11 +30,11 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const [historySearch, setHistorySearch] = useState('');
 
   // Master Roster Editor Local State (for editing before commit)
-  const [localEmployees, setLocalEmployees] = useState<Employee[]>([...employees]);
+  const [localEmployees, setLocalEmployees] = useState<Employee[]>([...(employees || [])]);
 
   // Sync localEmployees when global employees change
   useEffect(() => {
-    setLocalEmployees([...employees]);
+    setLocalEmployees([...(employees || [])]);
   }, [employees]);
 
   // Notification Banner Temp State
@@ -124,10 +124,10 @@ const AdminPage: React.FC<AdminPageProps> = ({
       return;
     }
 
-    const newEmployees = employees.map(emp => {
+    const newEmployees = (employees || []).map(emp => {
       if (emp.id === selectedEmpId) {
-        let updatedLeaves = emp.totalLeaves;
-        let updatedCOff = emp.cOffBalance;
+        let updatedLeaves = emp.totalLeaves || 0;
+        let updatedCOff = emp.cOffBalance || 0;
         let historyType: 'Leave' | 'C-Off Earned' | 'C-Off Taken';
 
         if (recordType === 'Leave') {
@@ -165,17 +165,20 @@ const AdminPage: React.FC<AdminPageProps> = ({
   const deleteEmployeeRecord = (empId: string, historyIdx: number) => {
     if (!window.confirm("Are you sure you want to delete this history entry?")) return;
 
-    const newEmployees = employees.map(emp => {
+    const newEmployees = (employees || []).map(emp => {
       if (emp.id === empId) {
-        const record = emp.history[historyIdx];
-        let updatedLeaves = emp.totalLeaves;
-        let updatedCOff = emp.cOffBalance;
+        const historyArray = emp.history || [];
+        const record = historyArray[historyIdx];
+        if (!record) return emp;
 
-        if (record.type === 'Leave') updatedLeaves -= 1;
-        else if (record.type === 'C-Off Earned') updatedCOff -= 1;
+        let updatedLeaves = emp.totalLeaves || 0;
+        let updatedCOff = emp.cOffBalance || 0;
+
+        if (record.type === 'Leave') updatedLeaves = Math.max(0, updatedLeaves - 1);
+        else if (record.type === 'C-Off Earned') updatedCOff = Math.max(0, updatedCOff - 1);
         else if (record.type === 'C-Off Taken') updatedCOff += 1;
 
-        const newHistory = emp.history.filter((_, i) => i !== historyIdx);
+        const newHistory = historyArray.filter((_, i) => i !== historyIdx);
         return { ...emp, totalLeaves: updatedLeaves, cOffBalance: updatedCOff, history: newHistory };
       }
       return emp;
@@ -184,7 +187,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
     set(ref(db, 'employees'), newEmployees);
   };
 
-  const selectedEmployee = employees.find(e => e.id === selectedEmpId);
+  const selectedEmployee = (employees || []).find(e => e.id === selectedEmpId);
 
   const renderRosterEditGroup = (startIndex: number, endIndex: number) => {
     return localEmployees.slice(startIndex, endIndex).map((emp, idx) => {
@@ -295,7 +298,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
                       <label className="text-[8px] text-slate-600 font-bold uppercase">{labels[idx]}</label>
                       <select value={tempShifts[s][field as keyof typeof tempShifts.A]} onChange={(e) => setTempShifts({...tempShifts, [s]: {...tempShifts[s], [field]: e.target.value}})} className="bg-slate-900 border border-slate-700 p-1 rounded text-[10px] text-white">
                         <option value="">None</option>
-                        {employees.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
+                        {(employees || []).map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
                       </select>
                     </div>
                   ))}
@@ -367,7 +370,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
               <tr><th className="p-2 text-left">Date</th><th className="p-2 text-left">Status</th><th className="p-2 text-right">Actions</th></tr>
             </thead>
             <tbody>
-              {Object.keys(dailyShiftHistory).filter(d => d.includes(historySearch)).sort((a,b) => b.localeCompare(a)).map(date => (
+              {Object.keys(dailyShiftHistory || {}).filter(d => d.includes(historySearch)).sort((a,b) => b.localeCompare(a)).map(date => (
                 <tr key={date} className="border-b border-slate-800/50">
                   <td className="p-2 font-bold text-slate-300">{date}</td>
                   <td className="p-2"><span className="text-green-500">Active Roster</span></td>
@@ -386,7 +389,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
             <label className="text-xs text-slate-500 orbitron uppercase font-bold">Select Employee</label>
             <select value={selectedEmpId} onChange={(e) => setSelectedEmpId(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-4 rounded text-white focus:ring-2 focus:ring-slate-500">
               <option value="">-- Choose Employee --</option>
-              {employees.map(e => <option key={e.id} value={e.id}>{e.name} ({e.id})</option>)}
+              {(employees || []).map(e => <option key={e.id} value={e.id}>{e.name} ({e.id})</option>)}
             </select>
             <div className="flex space-x-4">
               <button onClick={() => setRecordType('Leave')} className={`flex-1 py-3 rounded orbitron font-bold border ${recordType === 'Leave' ? 'silver-gradient text-slate-900 border-white' : 'bg-slate-900 text-slate-500 border-slate-700'}`}>LEAVE</button>
@@ -401,13 +404,17 @@ const AdminPage: React.FC<AdminPageProps> = ({
                       <tr><th className="p-2">Date</th><th className="p-2">Type</th><th className="p-2 text-right">Action</th></tr>
                     </thead>
                     <tbody>
-                      {(selectedEmployee.history || []).map((h, i) => (
-                        <tr key={i} className="border-b border-slate-800/50">
-                          <td className="p-2 text-slate-300">{h.date}</td>
-                          <td className="p-2 text-slate-400">{h.type}</td>
-                          <td className="p-2 text-right"><button onClick={() => deleteEmployeeRecord(selectedEmployee.id, i)} className="text-red-600 hover:text-red-400 font-bold px-1">REMOVE</button></td>
-                        </tr>
-                      ))}
+                      {(selectedEmployee?.history?.length ?? 0) > 0 ? (
+                        selectedEmployee.history.map((h, i) => (
+                          <tr key={i} className="border-b border-slate-800/50">
+                            <td className="p-2 text-slate-300">{h.date}</td>
+                            <td className="p-2 text-slate-400">{h.type}</td>
+                            <td className="p-2 text-right"><button onClick={() => deleteEmployeeRecord(selectedEmployee.id, i)} className="text-red-600 hover:text-red-400 font-bold px-1">REMOVE</button></td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr><td colSpan={3} className="p-10 text-center text-slate-600 italic">No record history found.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -440,7 +447,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
         <h3 className="text-slate-500 text-xs font-bold orbitron mb-4 uppercase">System Console Log</h3>
         <div className="font-mono text-[10px] text-green-500 space-y-1">
           <p>{'>'} Master Roster Controller Initialized</p>
-          <p>{'>'} Sync Status: Cloud (Firebase) Real-time (Ver 2.0.0)</p>
+          <p>{'>'} Sync Status: Cloud (Firebase) Real-time (Ver 2.0.1)</p>
           <p>{'>'} Security: Industrial standard Aes-256</p>
         </div>
       </section>

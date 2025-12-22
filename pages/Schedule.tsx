@@ -59,7 +59,7 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
   };
 
   const renderRosterGroup = (startIndex: number, endIndex: number) => {
-    return employees.slice(startIndex, endIndex).map((emp, idx) => (
+    return (employees || []).slice(startIndex, endIndex).map((emp, idx) => (
       <tr key={emp.id} className="border-b border-slate-800 hover:bg-white/5 transition-colors group">
         <td className="p-2 border border-slate-700 text-center font-bold text-slate-400">{startIndex + idx + 1}</td>
         <td className="p-2 border border-slate-700 font-bold text-slate-100 whitespace-nowrap min-w-[180px]">{emp.name}</td>
@@ -198,11 +198,11 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700 text-center">
                     <p className="text-[10px] text-slate-500 uppercase font-bold">Leaves</p>
-                    <p className="text-2xl font-black text-red-500">{selectedEmployee.totalLeaves}</p>
+                    <p className="text-2xl font-black text-red-500">{selectedEmployee.totalLeaves ?? 0}</p>
                   </div>
                   <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700 text-center">
                     <p className="text-[10px] text-slate-500 uppercase font-bold">C-Off</p>
-                    <p className="text-2xl font-black text-green-500">{selectedEmployee.cOffBalance}</p>
+                    <p className="text-2xl font-black text-green-500">{selectedEmployee.cOffBalance ?? 0}</p>
                   </div>
                </div>
             </div>
@@ -221,8 +221,8 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
                     </tr>
                   </thead>
                   <tbody className="text-xs">
-                    {selectedEmployee.history.length > 0 ? (
-                      selectedEmployee.history.map((entry, idx) => (
+                    {(selectedEmployee?.history?.length ?? 0) > 0 ? (
+                      selectedEmployee?.history?.map((entry, idx) => (
                         <tr key={idx} className="border-b border-slate-800/50">
                           <td className="p-3 text-slate-300">{entry.date}</td>
                           <td className="p-3">
