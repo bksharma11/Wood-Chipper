@@ -72,21 +72,16 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const getEffectiveShifts = () => {
-    const today = new Date().toISOString().split('T')[0];
-    return dailyShiftHistory[today] || INITIAL_SHIFTS;
-  };
-
   const renderPage = () => {
     switch (currentPage) {
       case Page.Schedule:
         return (
           <SchedulePage 
-            shifts={getEffectiveShifts()} 
             employees={employees} 
             notification={notification} 
             rosterMonth={rosterMonth}
             rosterYear={rosterYear}
+            dailyShiftHistory={dailyShiftHistory}
           />
         );
       case Page.Production:
@@ -106,11 +101,11 @@ const App: React.FC = () => {
       default:
         return (
           <SchedulePage 
-            shifts={getEffectiveShifts()} 
             employees={employees} 
             notification={notification} 
             rosterMonth={rosterMonth}
             rosterYear={rosterYear}
+            dailyShiftHistory={dailyShiftHistory}
           />
         );
     }
