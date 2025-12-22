@@ -1,36 +1,39 @@
 
 import React, { useState } from 'react';
-import { Shifts, Employee } from '../types';
+import { Shifts, Employee, DailyShifts } from '../types';
+import { INITIAL_SHIFTS } from '../constants';
 import { NotificationConfig } from '../App';
 
 interface ScheduleProps {
-  shifts: Shifts;
   employees: Employee[];
   notification: NotificationConfig;
   rosterMonth: number;
   rosterYear: number;
+  dailyShiftHistory: DailyShifts;
 }
 
-const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification, rosterMonth, rosterYear }) => {
+const SchedulePage: React.FC<ScheduleProps> = ({ employees, notification, rosterMonth, rosterYear, dailyShiftHistory }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
   const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
   const daysInMonth = new Date(rosterYear, rosterMonth + 1, 0).getDate();
   const dayArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   
-  // Logic for week days (simplified for 2026 start pattern)
+  // Get active shifts based on selected date
+  const activeShifts = dailyShiftHistory?.[selectedDate] || INITIAL_SHIFTS;
+
   const weekDays = ["THU", "FRI", "SAT", "SUN", "MON", "TUE", "WED"];
   const getDayLabel = (day: number) => {
-    // This is a relative calculation for visual consistency
     return weekDays[(day - 1) % 7];
   };
 
-  const selectedEmployee = employees.find(e => 
+  const selectedEmployee = (employees || []).find(e => 
     e.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     e.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const ShiftCard = ({ label, data }: { label: string, data: typeof shifts.A }) => {
+  const ShiftCard = ({ label, data }: { label: string, data: typeof INITIAL_SHIFTS.A }) => {
     const labels = label === 'General' 
       ? { s: 'Supervisor', c1: 'Incharge', c2: 'Operator' }
       : { s: 'Supervisor', c1: 'Chipper 1 Operator', c2: 'Chipper 2 Operator' };
@@ -88,12 +91,31 @@ const SchedulePage: React.FC<ScheduleProps> = ({ shifts, employees, notification
 
   return (
     <div className="space-y-8 py-4 animate-fadeIn">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ShiftCard label="A" data={shifts.A} />
-        <ShiftCard label="B" data={shifts.B} />
-        <ShiftCard label="C" data={shifts.C} />
-        <ShiftCard label="General" data={shifts.General} />
-      </div>
+      {/* Wrapped Daily Shift Section */}
+      <section className="brushed-metal p-6 rounded-2xl border border-slate-600/50 shadow-2xl">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 pb-3 border-b-4 border-slate-500/50">
+          <h2 className="text-2xl font-black orbitron text-white tracking-widest flex items-center">
+            <span className="w-2 h-8 bg-slate-400 mr-4"></span>
+            DAILY SHIFT SCHEDULE
+          </h2>
+          <div className="flex items-center space-x-3 mt-4 md:mt-0">
+            <label className="text-[10px] text-slate-400 orbitron font-bold uppercase tracking-tighter">View Date:</label>
+            <input 
+              type="date" 
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white orbitron font-bold text-xs focus:ring-2 focus:ring-slate-400 outline-none"
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ShiftCard label="A" data={activeShifts.A} />
+          <ShiftCard label="B" data={activeShifts.B} />
+          <ShiftCard label="C" data={activeShifts.C} />
+          <ShiftCard label="General" data={activeShifts.General} />
+        </div>
+      </section>
 
       <div className="bg-red-700/80 border-y border-red-500 p-2 overflow-hidden whitespace-nowrap shadow-[0_0_20px_rgba(239,68,68,0.4)] relative">
         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-red-700 to-transparent z-10"></div>
