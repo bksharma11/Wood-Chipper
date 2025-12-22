@@ -91,7 +91,7 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notification, roster
 
   return (
     <div className="space-y-8 py-4 animate-fadeIn">
-      {/* Wrapped Daily Shift Section */}
+      {/* 1. Daily Shift Section */}
       <section className="brushed-metal p-6 rounded-2xl border border-slate-600/50 shadow-2xl">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 pb-3 border-b-4 border-slate-500/50">
           <h2 className="text-2xl font-black orbitron text-white tracking-widest flex items-center">
@@ -117,83 +117,7 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notification, roster
         </div>
       </section>
 
-      <div className="bg-red-700/80 border-y border-red-500 p-2 overflow-hidden whitespace-nowrap shadow-[0_0_20px_rgba(239,68,68,0.4)] relative">
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-red-700 to-transparent z-10"></div>
-        <div className="animate-marquee inline-block text-white uppercase tracking-widest">
-          <span className={`${notification.font} ${notification.size}`}>
-            {notification.text} • {notification.text} • {notification.text}
-          </span>
-        </div>
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-red-700 to-transparent z-10"></div>
-      </div>
-
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(5%); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          animation: marquee 25s linear infinite;
-        }
-        .roster-scrollbar::-webkit-scrollbar {
-          height: 10px;
-        }
-        .roster-scrollbar::-webkit-scrollbar-track {
-          background: #1a1a1a;
-        }
-        .roster-scrollbar::-webkit-scrollbar-thumb {
-          background: #4b5563;
-          border-radius: 10px;
-          border: 2px solid #1a1a1a;
-        }
-      `}</style>
-
-      <section className="brushed-metal p-1 rounded-xl border border-slate-600/50 shadow-2xl overflow-hidden">
-        <div className="bg-slate-900/80 p-4 border-b border-slate-700 text-center">
-          <h2 className="text-xl font-black orbitron tracking-[0.3em] text-white">
-            CHIPPER SHIFT SCHEDULE : -- {months[rosterMonth]} - {rosterYear}
-          </h2>
-        </div>
-        
-        <div className="overflow-x-auto roster-scrollbar">
-          <table className="w-full text-xs border-collapse bg-black/30">
-            <thead>
-              <tr className="bg-slate-800/80 text-white font-bold">
-                <th rowSpan={2} className="p-2 border border-slate-700 min-w-[40px]">S.N</th>
-                <th rowSpan={2} className="p-2 border border-slate-700 text-left min-w-[180px]">Emp. Name</th>
-                <th rowSpan={2} className="p-2 border border-slate-700 min-w-[100px]">Emp. ID</th>
-                <th className="p-1 border border-slate-700 text-[9px] uppercase">Date</th>
-                {dayArray.map(d => (
-                  <th key={d} className="p-1 border border-slate-700 min-w-[32px] text-[10px]">{d}</th>
-                ))}
-                <th rowSpan={2} className="p-2 border border-slate-700 min-w-[120px]">Phone No</th>
-              </tr>
-              <tr className="bg-slate-800/40 text-slate-400 font-bold">
-                <th className="p-1 border border-slate-700 text-[8px] uppercase tracking-tighter">Rest</th>
-                {dayArray.map(d => (
-                  <th key={d} className="p-1 border border-slate-700 text-[8px]">{getDayLabel(d)}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {renderRosterGroup(0, 7)}
-              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
-              {renderRosterGroup(7, 9)}
-              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
-              {renderRosterGroup(9, 13)}
-              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
-              {renderRosterGroup(13, 14)}
-            </tbody>
-          </table>
-        </div>
-        
-        <div className="bg-slate-900/80 p-2 border-t border-slate-700 text-center">
-          <p className="text-white font-black orbitron text-sm tracking-[0.2em] animate-pulse">
-            NOBODY CHANGE SHIFT AND REST WITHOUT PERMISSION
-          </p>
-        </div>
-      </section>
-
+      {/* 2. Employee Quick-Look (Moved here as requested: below boxes and above master schedule) */}
       <section className="brushed-metal p-6 rounded-xl border border-slate-600/50">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <h2 className="text-2xl font-bold orbitron text-slate-200">Employee Quick-Look</h2>
@@ -268,6 +192,85 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notification, roster
             Scanning Database... No match found for "{searchQuery}"
           </div>
         )}
+      </section>
+
+      {/* 3. Notification Marquee */}
+      <div className="bg-red-700/80 border-y border-red-500 p-2 overflow-hidden whitespace-nowrap shadow-[0_0_20px_rgba(239,68,68,0.4)] relative">
+        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-red-700 to-transparent z-10"></div>
+        <div className="animate-marquee inline-block text-white uppercase tracking-widest">
+          <span className={`${notification.font} ${notification.size}`}>
+            {notification.text} • {notification.text} • {notification.text}
+          </span>
+        </div>
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-red-700 to-transparent z-10"></div>
+      </div>
+
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(5%); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 25s linear infinite;
+        }
+        .roster-scrollbar::-webkit-scrollbar {
+          height: 10px;
+        }
+        .roster-scrollbar::-webkit-scrollbar-track {
+          background: #1a1a1a;
+        }
+        .roster-scrollbar::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 10px;
+          border: 2px solid #1a1a1a;
+        }
+      `}</style>
+
+      {/* 4. Master Shift Schedule Table */}
+      <section className="brushed-metal p-1 rounded-xl border border-slate-600/50 shadow-2xl overflow-hidden">
+        <div className="bg-slate-900/80 p-4 border-b border-slate-700 text-center">
+          <h2 className="text-xl font-black orbitron tracking-[0.3em] text-white">
+            CHIPPER SHIFT SCHEDULE : -- {months[rosterMonth]} - {rosterYear}
+          </h2>
+        </div>
+        
+        <div className="overflow-x-auto roster-scrollbar">
+          <table className="w-full text-xs border-collapse bg-black/30">
+            <thead>
+              <tr className="bg-slate-800/80 text-white font-bold">
+                <th rowSpan={2} className="p-2 border border-slate-700 min-w-[40px]">S.N</th>
+                <th rowSpan={2} className="p-2 border border-slate-700 text-left min-w-[180px]">Emp. Name</th>
+                <th rowSpan={2} className="p-2 border border-slate-700 min-w-[100px]">Emp. ID</th>
+                <th className="p-1 border border-slate-700 text-[9px] uppercase">Date</th>
+                {dayArray.map(d => (
+                  <th key={d} className="p-1 border border-slate-700 min-w-[32px] text-[10px]">{d}</th>
+                ))}
+                <th rowSpan={2} className="p-2 border border-slate-700 min-w-[120px]">Phone No</th>
+              </tr>
+              <tr className="bg-slate-800/40 text-slate-400 font-bold">
+                <th className="p-1 border border-slate-700 text-[8px] uppercase tracking-tighter">Rest</th>
+                {dayArray.map(d => (
+                  <th key={d} className="p-1 border border-slate-700 text-[8px]">{getDayLabel(d)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {renderRosterGroup(0, 7)}
+              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
+              {renderRosterGroup(7, 9)}
+              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
+              {renderRosterGroup(9, 13)}
+              <tr className="h-4 bg-slate-900/50"><td colSpan={100}></td></tr>
+              {renderRosterGroup(13, 14)}
+            </tbody>
+          </table>
+        </div>
+        
+        <div className="bg-slate-900/80 p-2 border-t border-slate-700 text-center">
+          <p className="text-white font-black orbitron text-sm tracking-[0.2em] animate-pulse">
+            NOBODY CHANGE SHIFT AND REST WITHOUT PERMISSION
+          </p>
+        </div>
       </section>
     </div>
   );
