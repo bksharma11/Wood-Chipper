@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Page, Employee, DailyShifts, NotificationConfig } from './types';
 import { INITIAL_EMPLOYEES } from './constants';
-import Header from './Components/Header';
-import Footer from './Components/Footer';
-import Navigation from './Components/Navigation';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Navigation from './components/Navigation';
 import SchedulePage from './pages/Schedule';
 import ProductionPage from './pages/Production';
 import LabourPage from './pages/Labour';
