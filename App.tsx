@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Page, Employee, DailyShifts, NotificationConfig } from './types';
+import { Page, Employee, DailyShifts, NotificationConfig, LeaveRequest } from './types';
 import { INITIAL_EMPLOYEES } from './constants';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -19,13 +19,15 @@ const App: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
   const [dailyShiftHistory, setDailyShiftHistory] = useState<DailyShifts>({});
   const [notifications, setNotifications] = useState<NotificationConfig[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [rosterMonth, setRosterMonth] = useState<number>(0);
   const [rosterYear, setRosterYear] = useState<number>(2026);
 
   useEffect(() => {
     const employeesRef = ref(db, 'employees');
     const shiftsRef = ref(db, 'dailyShiftHistory');
-    const notificationsRef = ref(db, 'notifications'); // Updated path
+    const notificationsRef = ref(db, 'notifications');
+    const requestsRef = ref(db, 'leaveRequests');
     const monthRef = ref(db, 'rosterMonth');
     const yearRef = ref(db, 'rosterYear');
 
@@ -40,14 +42,25 @@ const App: React.FC = () => {
     const unsubNotifications = onValue(notificationsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Convert Firebase object to array
         const notificationsArray = Object.keys(data).map(key => ({
           id: key,
           ...data[key]
         }));
         setNotifications(notificationsArray);
       } else {
-        setNotifications([]); // Handle empty notifications
+        setNotifications([]);
+      }
+    });
+    const unsubRequests = onValue(requestsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const reqsArray = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setLeaveRequests(reqsArray);
+      } else {
+        setLeaveRequests([]);
       }
     });
     const unsubMonth = onValue(monthRef, (snapshot) => {
@@ -63,6 +76,7 @@ const App: React.FC = () => {
       unsubEmployees();
       unsubShifts();
       unsubNotifications();
+      unsubRequests();
       unsubMonth();
       unsubYear();
     };
@@ -107,6 +121,7 @@ const App: React.FC = () => {
             employees={employees} 
             dailyShiftHistory={dailyShiftHistory}
             notifications={notifications}
+            leaveRequests={leaveRequests}
             rosterMonth={rosterMonth}
             rosterYear={rosterYear}
             onLogout={handleLogout}

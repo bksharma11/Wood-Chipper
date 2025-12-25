@@ -16,6 +16,18 @@ export interface HistoryEntry {
   reason: string;
 }
 
+export interface LeaveRequest {
+  id: string;
+  empId: string;
+  empName: string;
+  type: 'Leave' | 'C-Off';
+  date: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminRemark?: string;
+  timestamp: number;
+}
+
 export interface LabourEntry {
   name: string;
   inTime: string;
@@ -51,7 +63,8 @@ export enum AdminPageType {
   Schedule = 'Master Schedule',
   Roster = 'Daily Roster',
   Notification = 'System Notification',
-  Leave = 'Leave Management'
+  Leave = 'Leave Management',
+  Requests = 'Leave Requests'
 }
 
 export interface NotificationConfig {

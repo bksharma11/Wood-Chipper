@@ -10,19 +10,20 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a;
-            color: #e5e7eb;
+            background-color: #f1f5f9;
+            color: #1e293b;
             margin: 0;
             padding: 0;
         }
         .metallic-bg {
-            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 80%);
+            background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, transparent 80%);
         }
         .brushed-metal {
-            background: linear-gradient(180deg, #3f3f3f 0%, #262626 50%, #171717 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.3);
         }
         .brushed-metal::before {
             content: '';
@@ -31,19 +32,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,0.03) 1px, rgba(255,255,255,0.03) 2px);
+            background: repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px);
             pointer-events: none;
         }
         .silver-gradient {
-            background: linear-gradient(145deg, #d1d5db, #9ca3af, #4b5563);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 6px rgba(0,0,0,0.3);
+            background: linear-gradient(145deg, #f8fafc, #cbd5e1, #94a3b8);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 4px 6px rgba(0,0,0,0.1);
         }
         .gold-neon {
-            color: #fbbf24;
-            text-shadow: 0 0 10px rgba(251, 191, 36, 0.6), 0 0 20px rgba(251, 191, 36, 0.4);
+            color: #b45309;
+            text-shadow: 0 0 5px rgba(180, 83, 9, 0.2);
             font-family: 'Dancing Script', cursive;
         }
         .orbitron { font-family: 'Orbitron', sans-serif; }
+        
+        /* Transition for light theme */
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 <script type="importmap">
 {
