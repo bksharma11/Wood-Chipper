@@ -1,15 +1,17 @@
 
 import React, { useState } from 'react';
-import { Employee, DailyShifts, AdminPageType, NotificationConfig } from '../types';
+import { Employee, DailyShifts, AdminPageType, NotificationConfig, LeaveRequest } from '../types';
 import MasterSchedule from '../components/admin/MasterSchedule';
 import DailyRoster from '../components/admin/DailyRoster';
 import SystemNotification from '../components/admin/SystemNotification';
 import LeaveManagement from '../components/admin/LeaveManagement';
+import LeaveRequestsAdmin from '../components/admin/LeaveRequestsAdmin';
 
 interface AdminPageProps {
   employees: Employee[];
   dailyShiftHistory: DailyShifts;
   notifications: NotificationConfig[];
+  leaveRequests: LeaveRequest[];
   rosterMonth: number;
   rosterYear: number;
   onLogout: () => void;
@@ -22,7 +24,8 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
     AdminPageType.Schedule, 
     AdminPageType.Roster, 
     AdminPageType.Notification, 
-    AdminPageType.Leave
+    AdminPageType.Leave,
+    AdminPageType.Requests
   ];
 
   const renderActiveView = () => {
@@ -35,6 +38,8 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
         return <SystemNotification notifications={props.notifications} />;
       case AdminPageType.Leave:
         return <LeaveManagement employees={props.employees} />;
+      case AdminPageType.Requests:
+        return <LeaveRequestsAdmin requests={props.leaveRequests} employees={props.employees} />;
       default:
         return <MasterSchedule employees={props.employees} rosterMonth={props.rosterMonth} rosterYear={props.rosterYear} />;
     }
@@ -43,8 +48,8 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
   return (
     <div className="space-y-8 py-4 animate-fadeIn">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-black orbitron silver-gradient bg-clip-text text-transparent">ADMIN CONSOLE</h1>
-        <button onClick={props.onLogout} className="bg-red-900/40 text-red-400 border border-red-700/50 px-4 py-1 rounded text-xs font-bold uppercase orbitron hover:bg-red-800/60">
+        <h1 className="text-3xl font-black orbitron text-slate-800 tracking-tighter">ADMIN CONSOLE</h1>
+        <button onClick={props.onLogout} className="bg-red-600 text-white px-4 py-1.5 rounded text-xs font-bold uppercase orbitron hover:bg-red-700 shadow-lg border-2 border-red-400">
           LOCK SYSTEM
         </button>
       </div>
@@ -52,17 +57,17 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Admin Navigation */}
         <aside className="lg:w-1/4">
-          <div className="brushed-metal p-4 rounded-xl border border-slate-600/50 shadow-lg">
-            <h2 className="text-sm font-bold orbitron text-slate-400 border-b border-slate-700 pb-3 mb-3 uppercase">Console Sections</h2>
-            <nav className="flex flex-row lg:flex-col gap-2">
+          <div className="brushed-metal p-4 rounded-xl border border-slate-300 shadow-lg">
+            <h2 className="text-sm font-bold orbitron text-slate-500 border-b border-slate-300 pb-3 mb-3 uppercase">Management Modules</h2>
+            <nav className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible">
               {adminTabs.map(tab => (
                 <button 
                   key={tab}
                   onClick={() => setActiveView(tab)}
-                  className={`w-full text-left p-3 rounded-md text-xs font-bold transition-all duration-200 ${
+                  className={`whitespace-nowrap w-full text-left p-3 rounded-md text-[10px] font-black transition-all duration-200 orbitron uppercase ${
                     activeView === tab 
-                      ? 'bg-blue-600/80 text-white shadow-md' 
-                      : 'text-slate-300 hover:bg-slate-700/50'
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-slate-500 hover:bg-slate-200'
                   }`}
                 >
                   {tab}
