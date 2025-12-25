@@ -6,7 +6,8 @@ export interface Employee {
   totalLeaves: number;
   cOffBalance: number;
   history: HistoryEntry[];
-  schedule?: string[]; // January 2026 pattern
+  schedules?: Record<string, string[]>; // Keyed by "YYYY-M" (e.g., "2026-0" for Jan)
+  role?: 'INCHARGE' | 'SUPERVISOR' | 'OPERATOR';
 }
 
 export interface HistoryEntry {
@@ -42,5 +43,24 @@ export enum Page {
   Schedule = 'Schedule',
   Production = 'Production',
   Labour = 'Labour',
-  Admin = 'Admin'
+  Admin = 'Admin',
+  Login = 'Login'
+}
+
+export enum AdminPageType {
+  Schedule = 'Master Schedule',
+  Roster = 'Daily Roster',
+  Notification = 'System Notification',
+  Leave = 'Leave Management'
+}
+
+export interface NotificationConfig {
+  id: string;
+  text: string;
+  // Styling
+  font: string;
+  size: string;
+  // Animation
+  duration: number; // in seconds
+  pause: number; // in seconds
 }
