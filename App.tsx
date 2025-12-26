@@ -10,6 +10,7 @@ import ProductionPage from './pages/Production';
 import LabourPage from './pages/Labour';
 import AdminPage from './pages/Admin';
 import LoginPage from './pages/Login';
+import GlobalAdminNotifier from './components/GlobalAdminNotifier';
 import { db } from './firebase';
 import { ref, onValue } from 'firebase/database';
 
@@ -140,9 +141,16 @@ const App: React.FC = () => {
     }
   };
 
+  const pendingRequestsCount = leaveRequests.filter(r => r.status === 'pending').length;
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header isAdmin={isAdmin} setCurrentPage={setCurrentPage} handleLogout={handleLogout} />
+      <GlobalAdminNotifier 
+        isAdmin={isAdmin} 
+        pendingRequestCount={pendingRequestsCount}
+        setCurrentPage={setCurrentPage}
+      />
       <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
       
       <main className="flex-grow pb-24 px-4 sm:px-6 lg:px-8">
