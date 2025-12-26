@@ -4,6 +4,7 @@ import { Employee, DailyShifts, NotificationConfig } from '../types';
 import ShiftCard from '../components/schedule/ShiftCard';
 import LeaveCheck from '../components/schedule/LeaveCheck';
 import LeaveRequestSystem from '../components/LeaveRequestSystem';
+import NeonCard from '../components/NeonCard';
 
 interface ScheduleProps {
   employees: Employee[];
@@ -28,15 +29,15 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notifications, roste
     return (employees || []).slice(startIndex, startIndex + count).map((emp, idx) => {
       const schedule = emp.schedules?.[scheduleKey] || Array(31).fill('-');
       return (
-        <tr key={emp.id} className="border-b border-slate-300 hover:bg-white/40 transition-colors">
-          <td className="p-2 border border-slate-300 text-center font-bold text-slate-500">{startIndex + idx + 1}</td>
-          <td className="p-2 border border-slate-300 font-bold text-slate-800 whitespace-nowrap min-w-[180px]">{emp.name}</td>
-          <td className="p-2 border border-slate-300 font-mono text-xs text-slate-500">{emp.id}</td>
+        <tr key={emp.id} className="border-b border-slate-700/50 hover:bg-cyan-500/5 transition-colors">
+          <td className="p-2 border border-slate-800 text-center font-bold text-slate-500">{startIndex + idx + 1}</td>
+          <td className="p-2 border border-slate-800 font-bold text-slate-200 whitespace-nowrap min-w-[180px]">{emp.name}</td>
+          <td className="p-2 border border-slate-800 font-mono text-xs text-slate-500">{emp.id}</td>
           {dayArray.map((day) => {
             const shift = schedule[day - 1] || '-';
             const isRest = shift === 'R';
             return (
-              <td key={day} className={`p-1 border border-slate-300 text-center text-xs font-black min-w-[32px] ${isRest ? 'bg-red-500 text-white' : 'text-slate-700'}`}>
+              <td key={day} className={`p-1 border border-slate-800 text-center text-xs font-black min-w-[32px] ${isRest ? 'bg-red-700 text-white shadow-inner' : 'text-slate-400'}`}>
                 {shift}
               </td>
             );
@@ -47,17 +48,17 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notifications, roste
   };
 
   return (
-    <div className="space-y-8 py-4 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn">
       {/* Daily Shift Section */}
-      <section className="brushed-metal p-6 rounded-2xl border border-slate-300 shadow-xl">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 pb-3 border-b-2 border-slate-300">
-          <h2 className="text-2xl font-black orbitron text-slate-800 tracking-widest uppercase">Daily Deployment</h2>
-          <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-800 orbitron font-bold text-xs" />
+      <NeonCard>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 pb-3 border-b-2 border-slate-700/50">
+          <h2 className="text-2xl font-black orbitron text-slate-100 tracking-widest uppercase">Daily Deployment</h2>
+          <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-slate-100 orbitron font-bold text-xs" />
         </div>
         
         {!isDatePublished ? (
-          <div className="p-10 text-center border border-dashed border-slate-300 rounded-xl bg-white/30">
-             <p className="orbitron text-slate-400 text-xs uppercase font-bold tracking-widest">Awaiting Management Publication</p>
+          <div className="p-10 text-center border border-dashed border-slate-800 rounded-xl bg-black/20">
+             <p className="orbitron text-slate-600 text-xs uppercase font-bold tracking-widest">Awaiting Daily Assignment</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -67,20 +68,20 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notifications, roste
             <ShiftCard label="General" data={activeShifts.General} />
           </div>
         )}
-      </section>
+      </NeonCard>
 
       {/* Leave & C-Off Status Viewer */}
       <LeaveCheck employees={employees} />
 
-      {/* Leave Request Form (New) */}
+      {/* Leave Request Form */}
       <LeaveRequestSystem employees={employees} />
 
       {/* Notification Banners */}
       <div className="space-y-2">
         {notifications.map((notification) => (
-          <div key={notification.id} className="bg-blue-600 border-y border-blue-400 p-2 overflow-hidden whitespace-nowrap shadow-lg">
+          <div key={notification.id} className="bg-cyan-900/30 border-y border-cyan-700/30 p-2 overflow-hidden whitespace-nowrap shadow-lg">
             <div 
-              className="animate-marquee inline-block text-white uppercase tracking-widest font-bold"
+              className="animate-marquee inline-block text-cyan-200 uppercase tracking-widest font-bold"
               style={{ animationDuration: `${notification.duration}s`, animationDelay: `${notification.pause}s` }}
             >
               <span className={`${notification.font} ${notification.size}`}>{notification.text} • {notification.text}</span>
@@ -90,20 +91,20 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notifications, roste
       </div>
 
       {/* Master Shift Table */}
-      <section className="brushed-metal p-1 rounded-xl border border-slate-300 shadow-xl overflow-hidden">
-        <div className="bg-slate-100 p-4 border-b border-slate-300 text-center">
-          <h2 className="text-xl font-black orbitron tracking-[0.3em] text-slate-800 uppercase">
+      <NeonCard>
+        <div className="bg-slate-900/50 p-4 border-b border-slate-700/50 text-center mb-4 rounded-t-lg -m-6">
+          <h2 className="text-xl font-black orbitron tracking-[0.3em] text-slate-100 uppercase">
             Master Roster: {months[rosterMonth]} {rosterYear}
           </h2>
         </div>
-        <div className="overflow-x-auto roster-scrollbar bg-white/50">
+        <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-200 text-slate-800 font-bold">
-                <th className="p-2 border border-slate-300">S.N</th>
-                <th className="p-2 border border-slate-300 text-left">Emp. Name</th>
-                <th className="p-2 border border-slate-300">Emp. ID</th>
-                {dayArray.map(d => <th key={d} className="p-1 border border-slate-300 min-w-[32px]">{d}</th>)}
+              <tr className="bg-slate-800/50 text-slate-300 font-bold uppercase tracking-tighter">
+                <th className="p-2 border border-slate-700/50">S.N</th>
+                <th className="p-2 border border-slate-700/50 text-left">Emp. Name</th>
+                <th className="p-2 border border-slate-700/50">Emp. ID</th>
+                {dayArray.map(d => <th key={d} className="p-1 border border-slate-700/50 min-w-[32px]">{d}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -111,7 +112,7 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notifications, roste
             </tbody>
           </table>
         </div>
-      </section>
+      </NeonCard>
 
       <style>{`
         @keyframes marquee {
@@ -121,8 +122,6 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, notifications, roste
         .animate-marquee {
           animation: marquee linear infinite;
         }
-        .roster-scrollbar::-webkit-scrollbar { height: 8px; }
-        .roster-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
       `}</style>
     </div>
   );
