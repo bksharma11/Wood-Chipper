@@ -4,6 +4,7 @@ import { Employee, Shifts, DailyShifts } from '../../types';
 import { INITIAL_SHIFTS } from '../../constants';
 import { db } from '../../firebase';
 import { ref, set } from 'firebase/database';
+import NeonCard from '../NeonCard';
 
 interface DailyRosterProps {
   employees: Employee[];
@@ -26,12 +27,12 @@ const DailyRoster: React.FC<DailyRosterProps> = ({ employees, dailyShiftHistory 
   };
 
   return (
-    <section className="brushed-metal p-6 rounded-xl border border-slate-600/50 shadow-2xl flex flex-col">
+    <NeonCard>
       <div className="flex justify-between items-start mb-6">
         <h2 className="text-xl font-bold orbitron text-slate-200">Daily Supervisor Management</h2>
         <div className="flex flex-col items-end">
           <label className="text-[10px] text-slate-500 uppercase font-bold mb-1">Select Date</label>
-          <input type="date" value={rosterDate} onChange={(e) => handleDateChange(e.target.value)} className="bg-slate-900 border border-slate-700 p-2 rounded text-xs text-white orbitron font-bold" />
+          <input type="date" value={rosterDate} onChange={(e) => handleDateChange(e.target.value)} className="bg-slate-900/70 border border-slate-700 p-2 rounded text-xs text-white orbitron font-bold" />
         </div>
       </div>
       <div className="space-y-4 flex-grow">
@@ -57,8 +58,8 @@ const DailyRoster: React.FC<DailyRosterProps> = ({ employees, dailyShiftHistory 
           );
         })}
       </div>
-      <button onClick={updateRoster} className="mt-6 w-full py-3 bg-green-700 text-white font-bold orbitron rounded shadow-xl hover:bg-green-600 border border-green-500 uppercase text-xs">Update Daily Assignment</button>
-    </section>
+      <button onClick={updateRoster} className="mt-6 w-full py-3 bg-green-600/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-green-600/40 font-bold orbitron transition-all uppercase text-xs">Update Daily Assignment</button>
+    </NeonCard>
   );
 };
 

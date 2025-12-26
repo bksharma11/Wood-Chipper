@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { NotificationConfig } from '../../types';
 import { db } from '../../firebase';
 import { ref, set, push, remove } from 'firebase/database';
+import NeonCard from '../NeonCard';
 
 interface SystemNotificationProps {
   notifications: NotificationConfig[];
@@ -10,8 +11,8 @@ interface SystemNotificationProps {
 
 const FONT_OPTIONS = [
   { value: 'orbitron', label: 'Orbitron (Sci-Fi)' },
-  { value: 'inter', label: 'Inter (Modern)' },
-  { value: 'dancing-script', label: 'Dancing Script (Cursive)' }
+  { value: 'font-sans', label: 'Inter (Modern)' },
+  { value: 'font-serif', label: 'Default Serif' }
 ];
 
 const SIZE_OPTIONS = [
@@ -92,19 +93,19 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
   }
 
   return (
-    <section className="brushed-metal p-6 rounded-xl border border-slate-600/50 shadow-2xl space-y-6">
-      <div className="flex justify-between items-center">
+    <NeonCard>
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold orbitron text-slate-200">System Notification Banners</h2>
         {!isFormVisible && (
-          <button onClick={handleAddNew} className="silver-gradient text-slate-900 px-4 py-1 rounded text-xs font-bold uppercase orbitron">
+          <button onClick={handleAddNew} className="px-4 py-2 text-xs font-bold orbitron uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/40 transition-colors">
             + Add New
           </button>
         )}
       </div>
 
       {isFormVisible && (
-        <div className="p-4 bg-slate-900/50 border border-slate-700 rounded-lg space-y-4">
-          <h3 className="font-bold orbitron text-slate-300">{editingNotification ? 'Edit Notification' : 'Add New Notification'}</h3>
+        <NeonCard className="bg-slate-900/50 border-slate-700/50">
+          <h3 className="font-bold orbitron text-slate-300 mb-4">{editingNotification ? 'Edit Notification' : 'Add New Notification'}</h3>
           
           <textarea 
             value={formData.text} 
@@ -112,7 +113,7 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
             className="w-full bg-slate-800 border border-slate-600 p-2 rounded text-white h-20" 
             placeholder="Scrolling text message..." 
           />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <select value={formData.font} onChange={(e) => handleInputChange('font', e.target.value)} className="bg-slate-800 border border-slate-600 p-2 rounded text-white text-xs">
               {FONT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
@@ -123,11 +124,11 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
             <input type="number" value={formData.pause} min="0" onChange={(e) => handleInputChange('pause', Number(e.target.value))} className="bg-slate-800 border border-slate-600 p-2 rounded text-white text-xs" title="Pause Between Scrolls (seconds)" />
           </div>
 
-          <div className="flex justify-end space-x-2 pt-2">
-            <button onClick={handleCancel} className="bg-slate-600 text-white px-4 py-2 rounded text-xs font-bold uppercase orbitron">Cancel</button>
-            <button onClick={handleSave} className="bg-green-700 text-white px-4 py-2 rounded text-xs font-bold uppercase orbitron">Save</button>
+          <div className="flex justify-end space-x-2 pt-4 mt-4 border-t border-slate-700/50">
+            <button onClick={handleCancel} className="px-4 py-2 text-xs font-bold orbitron uppercase bg-slate-600/20 text-slate-300 border border-slate-500/30 rounded-lg hover:bg-slate-600/40 transition-colors">Cancel</button>
+            <button onClick={handleSave} className="px-4 py-2 text-xs font-bold orbitron uppercase bg-green-600/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-green-600/40 transition-colors">Save</button>
           </div>
-        </div>
+        </NeonCard>
       )}
 
       <div className="space-y-2">
@@ -137,15 +138,15 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
           notifications.map(n => (
             <div key={n.id} className="flex justify-between items-center bg-black/20 p-3 rounded-lg border border-slate-800">
               <p className={`truncate ${n.size} ${n.font} text-slate-300`}>{n.text}</p>
-              <div className="flex space-x-2 flex-shrink-0 ml-4">
-                <button onClick={() => setEditingNotification(n)} className="text-blue-400 text-xs font-bold hover:underline">EDIT</button>
+              <div className="flex space-x-4 flex-shrink-0 ml-4">
+                <button onClick={() => setEditingNotification(n)} className="text-cyan-400 text-xs font-bold hover:underline">EDIT</button>
                 <button onClick={() => handleDelete(n.id)} className="text-red-500 text-xs font-bold hover:underline">DELETE</button>
               </div>
             </div>
           ))
         )}
       </div>
-    </section>
+    </NeonCard>
   );
 };
 

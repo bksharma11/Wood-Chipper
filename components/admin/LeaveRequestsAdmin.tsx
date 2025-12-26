@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { LeaveRequest, Employee, HistoryEntry } from '../../types';
 import { db } from '../../firebase';
 import { ref, set, remove } from 'firebase/database';
+import NeonCard from '../NeonCard';
 
 interface LeaveRequestsAdminProps {
   requests: LeaveRequest[];
@@ -40,12 +41,10 @@ const LeaveRequestsAdmin: React.FC<LeaveRequestsAdminProps> = ({ requests, emplo
         emp.history = history;
         updatedEmployees[empIdx] = emp;
         
-        // Save updated employee data
         await set(ref(db, 'employees'), updatedEmployees);
       }
     }
 
-    // Mark as handled or remove from list (here we remove for cleanliness)
     await remove(ref(db, `leaveRequests/${request.id}`));
     alert(`Request ${status.toUpperCase()} successfully.`);
   };
@@ -53,56 +52,56 @@ const LeaveRequestsAdmin: React.FC<LeaveRequestsAdminProps> = ({ requests, emplo
   const pending = requests.filter(r => r.status === 'pending');
 
   return (
-    <section className="brushed-metal p-6 rounded-xl border border-slate-300 shadow-xl">
-      <h2 className="text-xl font-bold mb-6 orbitron text-slate-700 uppercase">Incoming Leave Requests</h2>
+    <NeonCard>
+      <h2 className="text-xl font-bold mb-6 orbitron text-slate-100 uppercase">Incoming Leave Requests</h2>
       
       <div className="space-y-4">
         {pending.length === 0 ? (
-          <div className="py-10 text-center text-slate-400 font-bold uppercase orbitron text-xs bg-white/50 rounded border border-dashed border-slate-300">
+          <div className="py-10 text-center text-slate-500 font-bold uppercase orbitron text-xs bg-black/20 rounded-lg border border-dashed border-slate-700">
             No pending requests at this time.
           </div>
         ) : (
           pending.map(req => (
-            <div key={req.id} className="bg-white p-4 rounded-lg border border-slate-300 shadow-sm animate-fadeIn">
+            <NeonCard key={req.id} className="bg-slate-900/50 border-slate-700/50 animate-fadeIn">
               <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-black text-blue-700 orbitron text-sm">{req.empName}</span>
-                    <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-slate-500 font-bold">{req.empId}</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-black text-cyan-400 orbitron text-sm">{req.empName}</span>
+                    <span className="text-[10px] bg-slate-700 px-1.5 py-0.5 rounded border border-slate-600 text-slate-300 font-bold">{req.empId}</span>
                   </div>
-                  <p className="text-xs font-bold text-slate-700">Requesting: <span className="text-red-600">{req.type}</span> on <span className="text-slate-900">{req.date}</span></p>
-                  <p className="text-xs text-slate-500 italic mt-2 bg-blue-50 p-2 rounded border border-blue-100">" {req.reason} "</p>
+                  <p className="text-xs font-bold text-slate-300">Requesting: <span className="text-red-400">{req.type}</span> on <span className="text-slate-100">{req.date}</span></p>
+                  <p className="text-xs text-slate-400 italic mt-2 bg-black/20 p-2 rounded border border-slate-800">" {req.reason} "</p>
                 </div>
                 
                 <div className="w-full md:w-64 space-y-2">
                   <input 
                     type="text" 
-                    placeholder="Admin remark..." 
+                    placeholder="Admin remark (optional)..." 
                     value={adminRemark[req.id] || ''}
                     onChange={(e) => setAdminRemark({...adminRemark, [req.id]: e.target.value})}
-                    className="w-full text-xs p-2 border border-slate-300 rounded focus:ring-1 focus:ring-blue-400 outline-none"
+                    className="w-full text-xs p-2 bg-slate-800/70 border border-slate-700 rounded focus:ring-1 focus:ring-cyan-400 outline-none text-slate-200"
                   />
                   <div className="flex gap-2">
                     <button 
                       onClick={() => handleAction(req, 'approved')}
-                      className="flex-1 bg-green-600 text-white py-2 rounded text-[10px] font-bold orbitron hover:bg-green-700"
+                      className="flex-1 bg-green-600/20 text-green-300 border border-green-500/30 py-2 rounded text-[10px] font-bold orbitron hover:bg-green-600/40"
                     >
                       APPROVE
                     </button>
                     <button 
                       onClick={() => handleAction(req, 'rejected')}
-                      className="flex-1 bg-red-600 text-white py-2 rounded text-[10px] font-bold orbitron hover:bg-red-700"
+                      className="flex-1 bg-red-600/20 text-red-400 border border-red-500/30 py-2 rounded text-[10px] font-bold orbitron hover:bg-red-600/40"
                     >
                       REJECT
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            </NeonCard>
           ))
         )}
       </div>
-    </section>
+    </NeonCard>
   );
 };
 
