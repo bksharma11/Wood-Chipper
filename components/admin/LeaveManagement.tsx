@@ -21,7 +21,6 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
     
     setIsSubmitting(true);
     
-    // Logic to update local copy then push to Firebase
     const updatedEmployees = [...employees];
     const empIdx = updatedEmployees.findIndex(e => e.id === selectedEmployeeId);
     
@@ -62,73 +61,147 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
       });
   };
 
-  return (
-    <section className="brushed-metal p-6 rounded-xl border border-slate-300 shadow-lg">
-      <h2 className="text-xl font-bold mb-6 orbitron text-slate-700 uppercase">Manual Leave Entry</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">Target Employee</label>
-          <select 
-            value={selectedEmployeeId} 
-            onChange={(e) => setSelectedEmployeeId(e.target.value)}
-            className="w-full bg-white border border-slate-300 p-3 rounded text-slate-800 font-bold focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="" disabled>-- Select Employee to Update --</option>
-            {employees.map(emp => (
-              <option key={emp.id} value={emp.id}>{emp.name} ({emp.id})</option>
-            ))}
-          </select>
-        </div>
+  const deleteHistoryEntry = (empId: string, entryIdx: number) => {
+    if (!window.confirm("Are you sure you want to delete this specific history record? Balances will be recalculated.")) return;
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    const updatedEmployees = [...employees];
+    const empIdx = updatedEmployees.findIndex(e => e.id === empId);
+    if (empIdx === -1) return;
+
+    const emp = { ...updatedEmployees[empIdx] };
+    const history = [...(emp.history || [])];
+    const entryToDelete = history[entryIdx];
+
+    // Reverse the balance changes
+    if (entryToDelete.type === 'Leave') {
+      emp.totalLeaves = Math.max(0, (emp.totalLeaves || 0) - 1);
+    } else if (entryToDelete.type === 'C-Off Earned') {
+      emp.cOffBalance = Math.max(0, (emp.cOffBalance || 0) - 1);
+    } else if (entryToDelete.type === 'C-Off Taken') {
+      emp.cOffBalance = (emp.cOffBalance || 0) + 1;
+    }
+
+    history.splice(entryIdx, 1);
+    emp.history = history;
+    updatedEmployees[empIdx] = emp;
+
+    set(ref(db, 'employees'), updatedEmployees)
+      .then(() => alert("Entry deleted successfully."))
+      .catch(err => alert("Delete Failed: " + err.message));
+  };
+
+  const selectedEmp = employees.find(e => e.id === selectedEmployeeId);
+
+  return (
+    <div className="space-y-6">
+      <section className="brushed-metal p-6 rounded-xl border border-slate-700 shadow-lg">
+        <h2 className="text-xl font-bold mb-6 orbitron text-slate-100 uppercase">Manual Leave Entry</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">Log Type</label>
+            <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Target Employee</label>
             <select 
-              value={leaveType} 
-              onChange={(e) => setLeaveType(e.target.value as any)}
-              className="w-full bg-white border border-slate-300 p-3 rounded text-slate-800 font-bold"
+              value={selectedEmployeeId} 
+              onChange={(e) => setSelectedEmployeeId(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 p-3 rounded text-slate-200 font-bold focus:ring-2 focus:ring-blue-500"
             >
-              <option value="Leave">Record Annual Leave</option>
-              <option value="C-Off Taken">Use C-Off Balance</option>
-              <option value="C-Off Earned">Add C-Off Balance</option>
+              <option value="" disabled>-- Select Employee to Update --</option>
+              {employees.map(emp => (
+                <option key={emp.id} value={emp.id}>{emp.name} ({emp.id})</option>
+              ))}
             </select>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Log Type</label>
+              <select 
+                value={leaveType} 
+                onChange={(e) => setLeaveType(e.target.value as any)}
+                className="w-full bg-slate-900 border border-slate-700 p-3 rounded text-slate-200 font-bold"
+              >
+                <option value="Leave">Record Annual Leave</option>
+                <option value="C-Off Taken">Use C-Off Balance</option>
+                <option value="C-Off Earned">Add C-Off Balance</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Effect Date</label>
+              <input 
+                type="date" 
+                value={date} 
+                onChange={(e) => setDate(e.target.value)} 
+                className="w-full bg-slate-900 border border-slate-700 p-3 rounded text-slate-200 font-bold" 
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">Effect Date</label>
+            <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Official Remark / Reason</label>
             <input 
-              type="date" 
-              value={date} 
-              onChange={(e) => setDate(e.target.value)} 
-              className="w-full bg-white border border-slate-300 p-3 rounded text-slate-800 font-bold" 
+              type="text" 
+              value={reason} 
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Detailed reason for the log entry..."
+              className="w-full bg-slate-900 border border-slate-700 p-3 rounded text-slate-200 focus:ring-2 focus:ring-blue-500" 
             />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">Official Remark / Reason</label>
-          <input 
-            type="text" 
-            value={reason} 
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="Detailed reason for the log entry..."
-            className="w-full bg-white border border-slate-300 p-3 rounded text-slate-800 focus:ring-2 focus:ring-blue-500" 
-          />
-        </div>
+          <div className="pt-4 border-t border-slate-700">
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full py-4 font-black orbitron rounded shadow-lg uppercase text-sm border-2 transition-all ${
+                isSubmitting ? 'bg-slate-700 text-slate-500 border-slate-600' : 'bg-green-600 text-white border-green-400 hover:bg-green-700 active:scale-95'
+              }`}
+            >
+              {isSubmitting ? 'PROCESSING...' : 'COMMIT TRANSACTION'}
+            </button>
+          </div>
+        </form>
+      </section>
 
-        <div className="pt-4 border-t border-slate-200">
-          <button 
-            type="submit"
-            disabled={isSubmitting}
-            className={`w-full py-4 font-black orbitron rounded shadow-lg uppercase text-sm border-2 transition-all ${
-              isSubmitting ? 'bg-slate-400 cursor-wait' : 'bg-green-600 text-white border-green-400 hover:bg-green-700 active:scale-95'
-            }`}
-          >
-            {isSubmitting ? 'UPDATING...' : 'COMMIT TRANSACTION'}
-          </button>
-        </div>
-      </form>
-    </section>
+      {/* Delete Management for selected Employee */}
+      {selectedEmp && (
+        <section className="brushed-metal p-6 rounded-xl border border-slate-700 shadow-lg">
+          <h2 className="text-sm font-bold orbitron text-slate-400 mb-4 uppercase tracking-widest">Manage History: {selectedEmp.name}</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="bg-slate-800 text-slate-400 uppercase font-black tracking-tighter">
+                  <th className="p-3 border-b border-slate-700">Date</th>
+                  <th className="p-3 border-b border-slate-700">Type</th>
+                  <th className="p-3 border-b border-slate-700">Reason</th>
+                  <th className="p-3 border-b border-slate-700 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedEmp.history?.map((h, i) => (
+                  <tr key={i} className="border-b border-slate-800/50 hover:bg-white/5">
+                    <td className="p-3 font-mono text-slate-400">{h.date}</td>
+                    <td className={`p-3 font-bold ${h.type.includes('Taken') || h.type === 'Leave' ? 'text-red-400' : 'text-green-400'}`}>{h.type}</td>
+                    <td className="p-3 text-slate-300 italic truncate max-w-[200px]">{h.reason}</td>
+                    <td className="p-3 text-center">
+                      <button 
+                        onClick={() => deleteHistoryEntry(selectedEmp.id, i)}
+                        className="text-red-500 hover:text-red-300 font-bold orbitron text-[10px] uppercase border border-red-900 px-2 py-1 rounded bg-red-900/10"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {(!selectedEmp.history || selectedEmp.history.length === 0) && (
+                  <tr>
+                    <td colSpan={4} className="p-6 text-center text-slate-600 font-bold uppercase italic">No history records found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </div>
   );
 };
 
