@@ -2,15 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Page, Employee, DailyShifts, NotificationConfig, LeaveRequest } from './types';
 import { INITIAL_EMPLOYEES } from './constants';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Navigation from './components/Navigation';
+import AppLayout from './layout/AppLayout';
 import SchedulePage from './pages/Schedule';
 import ProductionPage from './pages/Production';
 import LabourPage from './pages/Labour';
 import AdminPage from './pages/Admin';
 import LoginPage from './pages/Login';
-import GlobalAdminNotifier from './components/GlobalAdminNotifier';
 import { db } from './firebase';
 import { ref, onValue } from 'firebase/database';
 
@@ -144,21 +141,15 @@ const App: React.FC = () => {
   const pendingRequestsCount = leaveRequests.filter(r => r.status === 'pending').length;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header isAdmin={isAdmin} setCurrentPage={setCurrentPage} handleLogout={handleLogout} />
-      <GlobalAdminNotifier 
-        isAdmin={isAdmin} 
-        pendingRequestCount={pendingRequestsCount}
-        setCurrentPage={setCurrentPage}
-      />
-      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      
-      <main className="flex-grow pb-24 px-4 sm:px-6 lg:px-8">
-        {renderPage()}
-      </main>
-
-      <Footer />
-    </div>
+    <AppLayout
+      isAdmin={isAdmin}
+      pendingRequestCount={pendingRequestsCount}
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      handleLogout={handleLogout}
+    >
+      {renderPage()}
+    </AppLayout>
   );
 };
 
