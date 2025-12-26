@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { LabourEntry, Employee } from '../types';
+import NeonCard from '../components/NeonCard';
 
 interface LabourPageProps {
   employees: Employee[];
@@ -30,24 +31,24 @@ const LabourPage: React.FC<LabourPageProps> = ({ employees }) => {
   };
 
   return (
-    <div className="space-y-8 py-4">
-      <section className="brushed-metal p-6 rounded-xl border border-slate-600/50 shadow-2xl">
+    <div className="space-y-8 animate-fadeIn">
+      <NeonCard>
         <h2 className="text-2xl font-bold mb-6 orbitron text-slate-200">Labour Attendance Management</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div>
-            <label className="block text-xs text-slate-500 mb-1 orbitron">DATE</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded text-white" />
+            <label className="block text-xs text-slate-400 mb-1 orbitron">DATE</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-white" />
           </div>
           <div>
-            <label className="block text-xs text-slate-500 mb-1 orbitron">SHIFT</label>
-            <select value={shift} onChange={(e) => setShift(e.target.value)} className="w-full bg-slate-900 border border-slate-700 p-3 rounded text-white">
+            <label className="block text-xs text-slate-400 mb-1 orbitron">SHIFT</label>
+            <select value={shift} onChange={(e) => setShift(e.target.value)} className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-white">
               <option>Day</option>
               <option>Night</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs text-slate-500 mb-1 orbitron">CONTRACTOR NAME</label>
-            <input type="text" value={contractor} onChange={(e) => setContractor(e.target.value)} placeholder="e.g. Sharma Logistics" className="w-full bg-slate-900 border border-slate-700 p-3 rounded text-white" />
+            <label className="block text-xs text-slate-400 mb-1 orbitron">CONTRACTOR NAME</label>
+            <input type="text" value={contractor} onChange={(e) => setContractor(e.target.value)} placeholder="e.g. Sharma Logistics" className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-white" />
           </div>
         </div>
 
@@ -64,14 +65,14 @@ const LabourPage: React.FC<LabourPageProps> = ({ employees }) => {
             </thead>
             <tbody>
               {labourList.map((row, idx) => (
-                <tr key={idx} className="border-b border-slate-800/50 hover:bg-white/5 transition-colors">
+                <tr key={idx} className="border-b border-slate-800/50 hover:bg-cyan-500/5 transition-colors">
                   <td className="p-2">
                     <input 
                       type="text" 
                       value={row.name} 
                       onChange={(e) => updateLabour(idx, 'name', e.target.value)}
                       placeholder="Labourer Name"
-                      className="w-full bg-transparent border-b border-slate-700 focus:border-slate-400 p-1 text-slate-100"
+                      className="w-full bg-transparent p-1 text-slate-100 outline-none focus:bg-slate-800/50 rounded"
                     />
                   </td>
                   <td className="p-2">
@@ -104,7 +105,7 @@ const LabourPage: React.FC<LabourPageProps> = ({ employees }) => {
                     </div>
                   </td>
                   <td className="p-2 text-center">
-                    <button onClick={() => removeRow(idx)} className="text-red-500 hover:text-red-400 font-bold p-1">×</button>
+                    <button onClick={() => removeRow(idx)} className="text-red-500 hover:text-red-400 font-bold p-1 text-xl">×</button>
                   </td>
                 </tr>
               ))}
@@ -114,27 +115,29 @@ const LabourPage: React.FC<LabourPageProps> = ({ employees }) => {
 
         <button 
           onClick={addRow}
-          className="mt-6 w-full py-3 border-2 border-dashed border-slate-700 rounded-lg text-slate-500 font-bold hover:border-slate-500 hover:text-slate-300 transition-all uppercase text-xs orbitron"
+          className="mt-6 w-full py-3 border border-dashed border-slate-700 rounded-lg text-slate-500 font-bold hover:border-cyan-500/50 hover:text-cyan-400 transition-all uppercase text-xs orbitron"
         >
           + Add New Entry
         </button>
-      </section>
+      </NeonCard>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/50 p-6 rounded-xl border border-slate-700 shadow-xl">
-        <div className="flex items-center space-x-4 w-full sm:w-auto">
-          <label className="text-xs text-slate-500 orbitron uppercase">Supervisor Select:</label>
-          <select 
-            value={supervisor} 
-            onChange={(e) => setSupervisor(e.target.value)}
-            className="bg-slate-800 border border-slate-600 p-2 rounded text-slate-200"
-          >
-            {employees.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
-          </select>
+      <NeonCard>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center space-x-4 w-full sm:w-auto">
+            <label className="text-xs text-slate-400 orbitron uppercase">Supervisor Select:</label>
+            <select 
+              value={supervisor} 
+              onChange={(e) => setSupervisor(e.target.value)}
+              className="bg-slate-800 border border-slate-600 p-2 rounded text-slate-200"
+            >
+              {employees.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
+            </select>
+          </div>
+          <button className="w-full sm:w-auto py-4 px-12 bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/40 font-black orbitron transition-all uppercase">
+            SAVE LABOUR LIST
+          </button>
         </div>
-        <button className="w-full sm:w-auto py-4 px-12 silver-gradient text-slate-900 font-black orbitron rounded-lg shadow-2xl hover:brightness-110 active:scale-95 transition-all">
-          SAVE LABOUR LIST
-        </button>
-      </div>
+      </NeonCard>
     </div>
   );
 };
