@@ -4,14 +4,14 @@ import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAqFbh7fuGJ3687pA4zTtir4IKcmlIHzKs",
-  authDomain: "chipper-app-519b1.firebaseapp.com",
-  databaseURL: "https://chipper-app-519b1-default-rtdb.firebaseio.com",
-  projectId: "chipper-app-519b1",
-  storageBucket: "chipper-app-519b1.firebasestorage.app",
-  messagingSenderId: "486832204820",
-  appId: "1:486832204820:web:bb1a81ff386180e6444b01",
-  measurementId: "G-PNH52L45WG"
+  apiKey: "AIzaSyCrr97f_JeUiVIgHch7jeVMTX0uyTeroTc",
+  authDomain: "wood-chipper-f73d8.firebaseapp.com",
+  databaseURL: "https://wood-chipper-f73d8-default-rtdb.firebaseio.com",
+  projectId: "wood-chipper-f73d8",
+  storageBucket: "wood-chipper-f73d8.firebasestorage.app",
+  messagingSenderId: "965375691222",
+  appId: "1:965375691222:web:34cea49e2cc8c69a16fc77",
+  measurementId: "G-GWWEVELJ4B"
 };
 
 const app = initializeApp(firebaseConfig);
