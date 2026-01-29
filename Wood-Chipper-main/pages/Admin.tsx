@@ -11,6 +11,7 @@ import GlassInput from '../components/ui/GlassInput';
 import GlassSelect from '../components/ui/GlassSelect';
 import { db } from '../firebase';
 import { ref, update, onValue } from 'firebase/database';
+import { handleFirebaseError } from '../utils';
 
 interface AdminPageProps {
   employees: Employee[];
@@ -104,9 +105,12 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
       await update(ref(db, 'environment'), newEnv);
       alert(`Weather updated for ${name}!`);
 
-    } catch (err) {
-      alert("Failed to fetch weather. Check location name.");
-      console.error(err);
+    } catch (err: any) {
+      if (err.message === "Location not found") {
+        alert("Location not found. Please try again.");
+      } else {
+        handleFirebaseError(err);
+      }
     } finally {
       setIsFetchingWeather(false);
     }
@@ -161,7 +165,7 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
                     <div className="flex flex-col justify-center">
                       {item.status !== 'Resolved' && (
                         <button
-                          onClick={() => update(ref(db, `complaints/${item.id}`), { status: 'Resolved' }).catch(e => alert("Error: " + e.message))}
+                          onClick={() => update(ref(db, `complaints/${item.id}`), { status: 'Resolved' }).catch(handleFirebaseError)}
                           className="bg-green-600/20 hover:bg-green-600/40 text-green-400 text-xs font-bold uppercase py-2 px-4 rounded transition-all"
                         >
                           Resolve

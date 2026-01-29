@@ -4,6 +4,7 @@ import { Employee, HistoryEntry } from '../../types';
 import { db } from '../../firebase';
 import { ref, set } from 'firebase/database';
 import NeonCard from '../NeonCard';
+import { handleFirebaseError } from '../../utils';
 
 interface LeaveManagementProps {
   employees: Employee[];
@@ -19,25 +20,25 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEmployeeId || !reason) return alert("Please select an employee and provide a reason.");
-    
+
     setIsSubmitting(true);
-    
+
     const updatedEmployees = [...employees];
     const empIdx = updatedEmployees.findIndex(e => e.id === selectedEmployeeId);
-    
+
     if (empIdx === -1) return setIsSubmitting(false);
-    
+
     const emp = { ...updatedEmployees[empIdx] };
     const history = [...(emp.history || [])];
-    
+
     const newEntry: HistoryEntry = {
       date,
       type: leaveType,
       reason
     };
-    
+
     history.unshift(newEntry);
-    
+
     if (leaveType === 'Leave') {
       emp.totalLeaves = (emp.totalLeaves || 0) + 1;
     } else if (leaveType === 'C-Off Earned') {
@@ -45,10 +46,10 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
     } else if (leaveType === 'C-Off Taken') {
       emp.cOffBalance = Math.max(0, (emp.cOffBalance || 0) - 1);
     }
-    
+
     emp.history = history;
     updatedEmployees[empIdx] = emp;
-    
+
     set(ref(db, 'employees'), updatedEmployees)
       .then(() => {
         alert(`Record Updated for ${emp.name}`);
@@ -56,7 +57,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
         setIsSubmitting(false);
       })
       .catch(err => {
-        alert("Update Failed: " + err.message);
+        handleFirebaseError(err);
         setIsSubmitting(false);
       });
   };
@@ -86,7 +87,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
 
     set(ref(db, 'employees'), updatedEmployees)
       .then(() => alert("Entry deleted successfully."))
-      .catch(err => alert("Delete Failed: " + err.message));
+      .catch(handleFirebaseError);
   };
 
   const selectedEmp = employees.find(e => e.id === selectedEmployeeId);
@@ -95,12 +96,12 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
     <div className="space-y-6">
       <NeonCard>
         <h2 className="text-xl font-bold mb-6 orbitron text-slate-100 uppercase">Manual Leave Entry</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Target Employee</label>
-            <select 
-              value={selectedEmployeeId} 
+            <select
+              value={selectedEmployeeId}
               onChange={(e) => setSelectedEmployeeId(e.target.value)}
               className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-slate-200 font-bold focus:ring-2 focus:ring-cyan-500"
             >
@@ -114,8 +115,8 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Log Type</label>
-              <select 
-                value={leaveType} 
+              <select
+                value={leaveType}
                 onChange={(e) => setLeaveType(e.target.value as any)}
                 className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-slate-200 font-bold"
               >
@@ -126,33 +127,32 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Effect Date</label>
-              <input 
-                type="date" 
-                value={date} 
-                onChange={(e) => setDate(e.target.value)} 
-                className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-slate-200 font-bold" 
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-slate-200 font-bold"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Official Remark / Reason</label>
-            <input 
-              type="text" 
-              value={reason} 
+            <input
+              type="text"
+              value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Detailed reason for the log entry..."
-              className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-slate-200 focus:ring-2 focus:ring-cyan-500" 
+              className="w-full bg-slate-900/70 border border-slate-700 p-3 rounded text-slate-200 focus:ring-2 focus:ring-cyan-500"
             />
           </div>
 
           <div className="pt-4 border-t border-slate-700/50">
-            <button 
+            <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-4 font-black orbitron rounded-lg shadow-lg uppercase text-sm border transition-all ${
-                isSubmitting ? 'bg-slate-700 text-slate-500 border-slate-600' : 'bg-green-600/20 text-green-300 border-green-500/30 hover:bg-green-600/40 active:scale-95'
-              }`}
+              className={`w-full py-4 font-black orbitron rounded-lg shadow-lg uppercase text-sm border transition-all ${isSubmitting ? 'bg-slate-700 text-slate-500 border-slate-600' : 'bg-green-600/20 text-green-300 border-green-500/30 hover:bg-green-600/40 active:scale-95'
+                }`}
             >
               {isSubmitting ? 'PROCESSING...' : 'COMMIT TRANSACTION'}
             </button>
@@ -180,7 +180,7 @@ const LeaveManagement: React.FC<LeaveManagementProps> = ({ employees }) => {
                     <td className={`p-3 font-bold ${h.type.includes('Taken') || h.type === 'Leave' ? 'text-red-400' : 'text-green-400'}`}>{h.type}</td>
                     <td className="p-3 text-slate-300 italic truncate max-w-[200px]">{h.reason}</td>
                     <td className="p-3 text-center">
-                      <button 
+                      <button
                         onClick={() => deleteHistoryEntry(selectedEmp.id, i)}
                         className="text-red-500 hover:text-red-300 font-bold orbitron text-[10px] uppercase border border-red-500/20 px-2 py-1 rounded bg-red-900/10"
                       >

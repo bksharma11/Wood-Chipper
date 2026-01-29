@@ -5,6 +5,7 @@ import { ref, set, remove } from 'firebase/database';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import GlassInput from '../ui/GlassInput';
+import { handleFirebaseError } from '../../utils';
 
 interface MasterScheduleProps {
   employees: Employee[];
@@ -61,7 +62,11 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
         alert(`Master Schedule and Employee Data Committed Successfully!`);
         setIsScheduleEditing(false);
       })
-      .catch((err) => alert("Error: " + err.message));
+      .then(() => {
+        alert(`Master Schedule and Employee Data Committed Successfully!`);
+        setIsScheduleEditing(false);
+      })
+      .catch(handleFirebaseError);
   };
 
   // --- CRUD Operations ---
@@ -76,7 +81,9 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
       const updatedList = localEmployees.filter(e => e.id !== empId);
       set(ref(db, 'employees'), updatedList)
         .then(() => alert(`${name} deleted.`))
-        .catch(err => alert(err.message));
+      set(ref(db, 'employees'), updatedList)
+        .then(() => alert(`${name} deleted.`))
+        .catch(handleFirebaseError);
     }
   };
 
@@ -102,11 +109,15 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
         setEditingEmployee(null);
         // alert("Employee Updated");
       })
-      .catch(err => alert(err.message));
+      .then(() => {
+        setEditingEmployee(null);
+        // alert("Employee Updated");
+      })
+      .catch(handleFirebaseError);
   };
 
-  const updateMonth = (val: number) => set(ref(db, 'rosterMonth'), val).catch(e => alert("Error: " + e.message));
-  const updateYear = (val: number) => set(ref(db, 'rosterYear'), val).catch(e => alert("Error: " + e.message));
+  const updateMonth = (val: number) => set(ref(db, 'rosterMonth'), val).catch(handleFirebaseError);
+  const updateYear = (val: number) => set(ref(db, 'rosterYear'), val).catch(handleFirebaseError);
 
   return (
     <GlassCard>

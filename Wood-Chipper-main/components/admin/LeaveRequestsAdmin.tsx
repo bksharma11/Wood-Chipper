@@ -4,6 +4,7 @@ import { LeaveRequest, Employee, HistoryEntry } from '../../types';
 import { db } from '../../firebase';
 import { ref, set, remove } from 'firebase/database';
 import NeonCard from '../NeonCard';
+import { handleFirebaseError } from '../../utils';
 
 interface LeaveRequestsAdminProps {
   requests: LeaveRequest[];
@@ -49,7 +50,7 @@ const LeaveRequestsAdmin: React.FC<LeaveRequestsAdminProps> = ({ requests, emplo
       await remove(ref(db, `leaveRequests/${request.id}`));
       alert(`Request ${status.toUpperCase()} successfully.`);
     } catch (err: any) {
-      alert("Error processing request: " + err.message);
+      handleFirebaseError(err);
     }
   };
 

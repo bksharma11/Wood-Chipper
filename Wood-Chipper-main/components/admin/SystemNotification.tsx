@@ -4,6 +4,7 @@ import { NotificationConfig } from '../../types';
 import { db } from '../../firebase';
 import { ref, set, push, remove } from 'firebase/database';
 import NeonCard from '../NeonCard';
+import { handleFirebaseError } from '../../utils';
 
 interface SystemNotificationProps {
   notifications: NotificationConfig[];
@@ -60,7 +61,7 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
       return;
     }
 
-    const path = editingNotification 
+    const path = editingNotification
       ? `notifications/${editingNotification.id}`
       : `notifications/${push(ref(db, 'notifications')).key}`;
 
@@ -76,7 +77,7 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
     if (window.confirm("Are you sure you want to delete this notification?")) {
       remove(ref(db, `notifications/${id}`))
         .then(() => alert("Notification deleted."))
-        .catch((err) => alert("Error: " + err.message));
+        .catch(handleFirebaseError);
     }
   };
 
@@ -85,7 +86,7 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
     setEditingNotification(null);
     setFormData(DEFAULT_NOTIFICATION);
   };
-  
+
   const handleAddNew = () => {
     setEditingNotification(null);
     setFormData(DEFAULT_NOTIFICATION);
@@ -106,12 +107,12 @@ const SystemNotification: React.FC<SystemNotificationProps> = ({ notifications }
       {isFormVisible && (
         <NeonCard className="bg-slate-900/50 border-slate-700/50">
           <h3 className="font-bold orbitron text-slate-300 mb-4">{editingNotification ? 'Edit Notification' : 'Add New Notification'}</h3>
-          
-          <textarea 
-            value={formData.text} 
-            onChange={(e) => handleInputChange('text', e.target.value)} 
-            className="w-full bg-slate-800 border border-slate-600 p-2 rounded text-white h-20" 
-            placeholder="Scrolling text message..." 
+
+          <textarea
+            value={formData.text}
+            onChange={(e) => handleInputChange('text', e.target.value)}
+            className="w-full bg-slate-800 border border-slate-600 p-2 rounded text-white h-20"
+            placeholder="Scrolling text message..."
           />
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <select value={formData.font} onChange={(e) => handleInputChange('font', e.target.value)} className="bg-slate-800 border border-slate-600 p-2 rounded text-white text-xs">

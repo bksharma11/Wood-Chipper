@@ -5,6 +5,7 @@ import { INITIAL_SHIFTS } from '../../constants';
 import { db } from '../../firebase';
 import { ref, set } from 'firebase/database';
 import NeonCard from '../NeonCard';
+import { handleFirebaseError } from '../../utils';
 
 interface DailyRosterProps {
   employees: Employee[];
@@ -23,7 +24,8 @@ const DailyRoster: React.FC<DailyRosterProps> = ({ employees, dailyShiftHistory 
   const updateRoster = () => {
     set(ref(db, `dailyShiftHistory/${rosterDate}`), tempShifts)
       .then(() => alert(`Daily Roster for ${rosterDate} updated!`))
-      .catch((err) => alert("Error: " + err.message));
+      .then(() => alert(`Daily Roster for ${rosterDate} updated!`))
+      .catch(handleFirebaseError);
   };
 
   return (
@@ -44,9 +46,9 @@ const DailyRoster: React.FC<DailyRosterProps> = ({ employees, dailyShiftHistory 
               {['supervisor', 'chipper1', 'chipper2'].map((field, idx) => (
                 <div key={field} className="flex flex-col gap-1">
                   <label className="text-[8px] text-slate-600 font-bold uppercase">{labels[idx]}</label>
-                  <select 
-                    value={tempShifts[s][field as keyof typeof tempShifts.A] || ''} 
-                    onChange={(e) => setTempShifts({...tempShifts, [s]: {...tempShifts[s], [field]: e.target.value}})} 
+                  <select
+                    value={tempShifts[s][field as keyof typeof tempShifts.A] || ''}
+                    onChange={(e) => setTempShifts({ ...tempShifts, [s]: { ...tempShifts[s], [field]: e.target.value } })}
                     className="bg-slate-900 border border-slate-700 p-1 rounded text-[10px] text-white"
                   >
                     <option value="">None</option>

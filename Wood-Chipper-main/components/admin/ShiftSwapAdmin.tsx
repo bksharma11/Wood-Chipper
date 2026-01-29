@@ -4,6 +4,7 @@ import { ShiftSwapRequest, Employee } from '../../types';
 import { db } from '../../firebase';
 import { ref, update } from 'firebase/database';
 import GlassCard from '../ui/GlassCard';
+import { handleFirebaseError } from '../../utils';
 
 interface ShiftSwapAdminProps {
     requests: ShiftSwapRequest[];
@@ -24,9 +25,8 @@ const ShiftSwapAdmin: React.FC<ShiftSwapAdminProps> = ({ requests, employees }) 
                 adminRemark: reason || (status === 'approved' ? 'Approved by Admin' : 'Rejected'),
             });
             alert(`Request ${status.toUpperCase()} Successfully`);
-        } catch (err) {
-            console.error(err);
-            alert("Failed to update request");
+        } catch (err: any) {
+            handleFirebaseError(err);
         }
     };
 
