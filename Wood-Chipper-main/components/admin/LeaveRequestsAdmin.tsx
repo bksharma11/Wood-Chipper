@@ -15,38 +15,42 @@ const LeaveRequestsAdmin: React.FC<LeaveRequestsAdminProps> = ({ requests, emplo
 
   const handleAction = async (request: LeaveRequest, status: 'approved' | 'rejected') => {
     const remark = adminRemark[request.id] || "No remarks";
-    
-    if (status === 'approved') {
-      const updatedEmployees = [...employees];
-      const empIdx = updatedEmployees.findIndex(e => e.id === request.empId);
-      
-      if (empIdx !== -1) {
-        const emp = { ...updatedEmployees[empIdx] };
-        const history = [...(emp.history || [])];
-        
-        const newEntry: HistoryEntry = {
-          date: request.date,
-          type: request.type === 'Leave' ? 'Leave' : 'C-Off Taken',
-          reason: `[APPROVED REQ] ${request.reason} | Remark: ${remark}`
-        };
-        
-        history.unshift(newEntry);
-        
-        if (request.type === 'Leave') {
-          emp.totalLeaves = (emp.totalLeaves || 0) + 1;
-        } else {
-          emp.cOffBalance = Math.max(0, (emp.cOffBalance || 0) - 1);
-        }
-        
-        emp.history = history;
-        updatedEmployees[empIdx] = emp;
-        
-        await set(ref(db, 'employees'), updatedEmployees);
-      }
-    }
 
-    await remove(ref(db, `leaveRequests/${request.id}`));
-    alert(`Request ${status.toUpperCase()} successfully.`);
+    try {
+      if (status === 'approved') {
+        const updatedEmployees = [...employees];
+        const empIdx = updatedEmployees.findIndex(e => e.id === request.empId);
+
+        if (empIdx !== -1) {
+          const emp = { ...updatedEmployees[empIdx] };
+          const history = [...(emp.history || [])];
+
+          const newEntry: HistoryEntry = {
+            date: request.date,
+            type: request.type === 'Leave' ? 'Leave' : 'C-Off Taken',
+            reason: `[APPROVED REQ] ${request.reason} | Remark: ${remark}`
+          };
+
+          history.unshift(newEntry);
+
+          if (request.type === 'Leave') {
+            emp.totalLeaves = (emp.totalLeaves || 0) + 1;
+          } else {
+            emp.cOffBalance = Math.max(0, (emp.cOffBalance || 0) - 1);
+          }
+
+          emp.history = history;
+          updatedEmployees[empIdx] = emp;
+
+          await set(ref(db, 'employees'), updatedEmployees);
+        }
+      }
+
+      await remove(ref(db, `leaveRequests/${request.id}`));
+      alert(`Request ${status.toUpperCase()} successfully.`);
+    } catch (err: any) {
+      alert("Error processing request: " + err.message);
+    }
   };
 
   const pending = requests.filter(r => r.status === 'pending');
@@ -54,7 +58,7 @@ const LeaveRequestsAdmin: React.FC<LeaveRequestsAdminProps> = ({ requests, emplo
   return (
     <NeonCard>
       <h2 className="text-xl font-bold mb-6 orbitron text-slate-100 uppercase">Incoming Leave Requests</h2>
-      
+
       <div className="space-y-4">
         {pending.length === 0 ? (
           <div className="py-10 text-center text-slate-500 font-bold uppercase orbitron text-xs bg-black/20 rounded-lg border border-dashed border-slate-700">
@@ -72,23 +76,23 @@ const LeaveRequestsAdmin: React.FC<LeaveRequestsAdminProps> = ({ requests, emplo
                   <p className="text-xs font-bold text-slate-300">Requesting: <span className="text-red-400">{req.type}</span> on <span className="text-slate-100">{req.date}</span></p>
                   <p className="text-xs text-slate-400 italic mt-2 bg-black/20 p-2 rounded border border-slate-800">" {req.reason} "</p>
                 </div>
-                
+
                 <div className="w-full md:w-64 space-y-2">
-                  <input 
-                    type="text" 
-                    placeholder="Admin remark (optional)..." 
+                  <input
+                    type="text"
+                    placeholder="Admin remark (optional)..."
                     value={adminRemark[req.id] || ''}
-                    onChange={(e) => setAdminRemark({...adminRemark, [req.id]: e.target.value})}
+                    onChange={(e) => setAdminRemark({ ...adminRemark, [req.id]: e.target.value })}
                     className="w-full text-xs p-2 bg-slate-800/70 border border-slate-700 rounded focus:ring-1 focus:ring-cyan-400 outline-none text-slate-200"
                   />
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => handleAction(req, 'approved')}
                       className="flex-1 bg-green-600/20 text-green-300 border border-green-500/30 py-2 rounded text-[10px] font-bold orbitron hover:bg-green-600/40"
                     >
                       APPROVE
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleAction(req, 'rejected')}
                       className="flex-1 bg-red-600/20 text-red-400 border border-red-500/30 py-2 rounded text-[10px] font-bold orbitron hover:bg-red-600/40"
                     >

@@ -101,7 +101,7 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
       };
 
       setEnvData(newEnv);
-      update(ref(db, 'environment'), newEnv);
+      await update(ref(db, 'environment'), newEnv);
       alert(`Weather updated for ${name}!`);
 
     } catch (err) {
@@ -161,7 +161,7 @@ const AdminPage: React.FC<AdminPageProps> = (props) => {
                     <div className="flex flex-col justify-center">
                       {item.status !== 'Resolved' && (
                         <button
-                          onClick={() => update(ref(db, `complaints/${item.id}`), { status: 'Resolved' })}
+                          onClick={() => update(ref(db, `complaints/${item.id}`), { status: 'Resolved' }).catch(e => alert("Error: " + e.message))}
                           className="bg-green-600/20 hover:bg-green-600/40 text-green-400 text-xs font-bold uppercase py-2 px-4 rounded transition-all"
                         >
                           Resolve

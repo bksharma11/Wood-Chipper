@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { auth } from '../firebase';
+import { signInAnonymously } from 'firebase/auth';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
 
@@ -10,11 +12,23 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin === '967514') {
-      setError('');
-      onLoginSuccess();
+      try {
+        await signInAnonymously(auth);
+        setError('');
+        onLoginSuccess();
+      } catch (err: any) {
+        // Fallback for demo if auth fails but pin is right (though writes might fail)
+        // Better to show error
+        console.error(err);
+        if (err.code === 'auth/admin-restricted-operation' || err.code === 'auth/operation-not-allowed') {
+          setError('Login Error: Anonymous Auth likely disabled in Firebase Console.');
+        } else {
+          setError('Connection Error: ' + err.message);
+        }
+      }
     } else {
       setError('Incorrect PIN. Please try again.');
       setPin('');

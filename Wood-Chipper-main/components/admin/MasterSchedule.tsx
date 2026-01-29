@@ -105,8 +105,8 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
       .catch(err => alert(err.message));
   };
 
-  const updateMonth = (val: number) => set(ref(db, 'rosterMonth'), val);
-  const updateYear = (val: number) => set(ref(db, 'rosterYear'), val);
+  const updateMonth = (val: number) => set(ref(db, 'rosterMonth'), val).catch(e => alert("Error: " + e.message));
+  const updateYear = (val: number) => set(ref(db, 'rosterYear'), val).catch(e => alert("Error: " + e.message));
 
   return (
     <GlassCard>
