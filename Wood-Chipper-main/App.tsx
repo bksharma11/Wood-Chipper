@@ -36,6 +36,16 @@ const App: React.FC = () => {
       }
     });
 
+    // 2. Connection Monitor
+    const connectedRef = ref(db, ".info/connected");
+    onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        console.log("✅ CONNECTED to Firebase");
+      } else {
+        console.warn("❌ DISCONNECTED from Firebase");
+      }
+    });
+
     const employeesRef = ref(db, 'employees');
     const shiftsRef = ref(db, 'dailyShiftHistory');
     const notificationsRef = ref(db, 'notifications');
@@ -48,10 +58,12 @@ const App: React.FC = () => {
       const data = snapshot.val();
       if (data) setEmployees(data);
     }, handleFirebaseError);
+
     const unsubShifts = onValue(shiftsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) setDailyShiftHistory(data);
     }, handleFirebaseError);
+
     const unsubNotifications = onValue(notificationsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -63,7 +75,8 @@ const App: React.FC = () => {
       } else {
         setNotifications([]);
       }
-    });
+    }, handleFirebaseError);
+
     const unsubRequests = onValue(requestsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -75,7 +88,8 @@ const App: React.FC = () => {
       } else {
         setLeaveRequests([]);
       }
-    });
+    }, handleFirebaseError);
+
     const unsubSwapRequests = onValue(swapRequestsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -87,15 +101,17 @@ const App: React.FC = () => {
       } else {
         setShiftSwapRequests([]);
       }
-    });
+    }, handleFirebaseError);
+
     const unsubMonth = onValue(monthRef, (snapshot) => {
       const data = snapshot.val();
       if (data !== null) setRosterMonth(data);
-    });
+    }, handleFirebaseError);
+
     const unsubYear = onValue(yearRef, (snapshot) => {
       const data = snapshot.val();
       if (data !== null) setRosterYear(data);
-    });
+    }, handleFirebaseError);
 
     return () => {
       unsubEmployees();
