@@ -18,17 +18,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       try {
         await signInAnonymously(auth);
         setError('');
-        onLoginSuccess();
       } catch (err: any) {
-        // Fallback for demo if auth fails but pin is right (though writes might fail)
-        // Better to show error
-        console.error(err);
-        if (err.code === 'auth/admin-restricted-operation' || err.code === 'auth/operation-not-allowed') {
-          setError('Login Error: Anonymous Auth likely disabled in Firebase Console.');
-        } else {
-          setError('Connection Error: ' + err.message);
-        }
+        console.error("Auth failed, continuing with local admin access:", err);
+        // We allow entry even if silent auth fails to prevent lockout. 
+        // Real database permission errors will appear as Alerts on specific actions.
       }
+      onLoginSuccess();
     } else {
       setError('Incorrect PIN. Please try again.');
       setPin('');
