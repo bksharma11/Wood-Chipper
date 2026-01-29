@@ -9,8 +9,10 @@ import ProductionPage from './pages/Production';
 import LabourPage from './pages/Labour';
 import AdminPage from './pages/Admin';
 import LoginPage from './pages/Login';
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import { ref, onValue } from 'firebase/database';
+import { signInAnonymously } from 'firebase/auth';
+import { handleFirebaseError } from './utils';
 
 const App: React.FC = () => {
   // Set initial page to Dashboard (Command Center)
@@ -25,6 +27,15 @@ const App: React.FC = () => {
   const [rosterYear, setRosterYear] = useState<number>(2026);
 
   useEffect(() => {
+    // 1. Silent Auth (Critical for Dashboard Reads)
+    signInAnonymously(auth).catch((err) => {
+      console.error("Auto-login failed:", err);
+      // Only alert if it's a rule config issue
+      if (err.code === 'auth/operation-not-allowed') {
+        alert("⚠️ Data Sync Paused: Please enable 'Anonymous Auth' in Firebase Console.");
+      }
+    });
+
     const employeesRef = ref(db, 'employees');
     const shiftsRef = ref(db, 'dailyShiftHistory');
     const notificationsRef = ref(db, 'notifications');
@@ -36,11 +47,11 @@ const App: React.FC = () => {
     const unsubEmployees = onValue(employeesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) setEmployees(data);
-    });
+    }, handleFirebaseError);
     const unsubShifts = onValue(shiftsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) setDailyShiftHistory(data);
-    });
+    }, handleFirebaseError);
     const unsubNotifications = onValue(notificationsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
