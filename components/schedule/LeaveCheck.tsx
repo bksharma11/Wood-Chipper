@@ -15,6 +15,14 @@ const LeaveCheck: React.FC<LeaveCheckProps> = ({ employees, isAdmin }) => {
 
   const selectedEmployee = employees.find(e => e.id === selectedId);
 
+  // Hardcode override for Bhupendra Kumar to hide/reset balances locally for display
+  if (selectedEmployee && selectedEmployee.name.trim() === "Bhupendra Kumar") {
+    selectedEmployee.totalLeaves = 0;
+    selectedEmployee.cOffBalance = 0;
+    // We can also hide history if needed, but user specifically asked to remove "leave or c-off dikhata hai"
+    // likely referring to the balance numbers.
+  }
+
   const handleReset = async () => {
     if (!selectedEmployee) return;
     if (!window.confirm(`Are you sure you want to RESET ALL leave data for ${selectedEmployee.name}? This cannot be undone.`)) return;
