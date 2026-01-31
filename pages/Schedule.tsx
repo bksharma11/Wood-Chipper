@@ -49,9 +49,9 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, rosterMonth, rosterY
     return (
       <React.Fragment key={title}>
         {/* Section Header */}
-        <tr className="bg-slate-900/80">
-          <td colSpan={100} className="p-3 text-left">
-            <span className="text-cyan-400 font-black uppercase tracking-widest text-sm border-l-4 border-cyan-500 pl-3">
+        <tr className="bg-slate-200 border-y-2 border-slate-300">
+          <td colSpan={100} className="p-2 text-left">
+            <span className="text-slate-900 font-black uppercase tracking-widest text-xs border-l-4 border-slate-900 pl-3">
               {title}
             </span>
           </td>
@@ -61,15 +61,15 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, rosterMonth, rosterY
         {group.map((emp, idx) => {
           const schedule = emp.schedules?.[scheduleKey] || Array(31).fill('-');
           return (
-            <tr key={emp.id} className="border-b border-white/5 hover:bg-cyan-500/5 transition-colors">
-              <td className="p-2 border border-slate-700/30 text-center font-bold text-slate-500">{startIndex + idx + 1}</td>
-              <td className="p-2 border border-slate-700/30 font-bold text-slate-200 whitespace-nowrap min-w-[180px]">{emp.name}</td>
-              <td className="p-2 border border-slate-700/30 font-mono text-xs text-slate-500">{emp.id}</td>
+            <tr key={emp.id} className="border-b-2 border-slate-300 hover:bg-slate-50 transition-colors">
+              <td className="p-1 border-r-2 border-slate-300 text-center font-black text-slate-800 text-xs">{startIndex + idx + 1}</td>
+              <td className="p-1 border-r-2 border-slate-300 font-extrabold text-slate-900 whitespace-nowrap min-w-[180px] text-sm">{emp.name}</td>
+              <td className="p-1 border-r-2 border-slate-300 font-mono font-bold text-xs text-slate-700">{emp.id}</td>
               {dayArray.map((day) => {
                 const shift = schedule[day - 1] || '-';
                 const isRest = shift === 'R';
                 return (
-                  <td key={day} className={`p-1 border border-slate-700/30 text-center text-xs font-black min-w-[32px] ${isRest ? 'bg-red-900/40 text-red-200 shadow-inner' : 'text-slate-400'}`}>
+                  <td key={day} className={`p-1 border-r-2 border-slate-300 text-center text-xs font-black min-w-[32px] ${isRest ? 'bg-red-600 text-white' : 'text-slate-900'}`}>
                     {shift}
                   </td>
                 );
@@ -111,29 +111,42 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, rosterMonth, rosterY
             </span>
           </div>
 
-          <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full text-xs border-collapse">
+          <div className="overflow-x-auto scrollbar-thin bg-white rounded-lg shadow-xl">
+            <table className="w-full text-xs border-collapse text-black">
               <thead>
-                <tr className="bg-slate-950/50 text-slate-400 font-bold uppercase tracking-wider">
-                  <th className="p-3 border border-slate-700/50 text-center">S.N</th>
-                  <th className="p-3 border border-slate-700/50 text-left">Worker Name</th>
-                  <th className="p-3 border border-slate-700/50 text-left">ID</th>
-                  {dayArray.map(d => <th key={d} className="p-2 border border-slate-700/50 min-w-[32px] text-center">{d}</th>)}
+                <tr className="bg-slate-100 text-black font-black uppercase tracking-wider text-sm">
+                  <th className="p-2 border-2 border-slate-300 text-center">S.N</th>
+                  <th className="p-2 border-2 border-slate-300 text-left">Worker Name</th>
+                  <th className="p-2 border-2 border-slate-300 text-left">ID</th>
+                  {dayArray.map(d => {
+                    const dateObj = new Date(rosterYear, rosterMonth, d);
+                    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase().slice(0, 3);
+                    return (
+                      <th key={d} className="p-1 border-2 border-slate-300 min-w-[32px] text-center bg-slate-50">
+                        <div className="flex flex-col items-center leading-none py-1">
+                          <span className="text-sm font-black">{d}</span>
+                          <span className="text-[9px] text-slate-700 font-bold mt-0.5">{dayName}</span>
+                        </div>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
-              <tbody className="bg-slate-900/20">
+              <tbody className="bg-white">
                 {renderSection("Operators", groupOperators, 0)}
-                {/* General Operators continues from Operators */}
                 {renderSection("General operators", groupGeneralOperators, groupOperators.length)}
-
-                {/* Supervisor RESTARTS at 0 */}
                 {renderSection("Supervisor", groupSupervisors, 0)}
-
-                {/* Incharge RESTARTS at 0 */}
                 {renderSection("INCHARGE", groupIncharge, 0)}
-
-                {/* Others RESTARTS at 0 */}
                 {renderSection("Others", groupOthers, 0)}
+
+                {/* Disclaimer Footer */}
+                <tr className="bg-white border-t-4 border-slate-900">
+                  <td colSpan={100} className="p-3 text-center">
+                    <span className="text-black font-black text-sm uppercase tracking-[0.2em]">
+                      NOBODY CHANGE SHIFT AND REST WITHOUT PERMISSION
+                    </span>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

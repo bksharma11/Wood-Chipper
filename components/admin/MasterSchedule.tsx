@@ -56,6 +56,50 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
     });
   }, [scheduleKey]);
 
+  const handlePaste = (e: React.ClipboardEvent, startEmpIdx: number, startDayIdx: number) => {
+    e.preventDefault();
+    if (!isScheduleEditing) return;
+
+    const clipboardData = e.clipboardData.getData('Text');
+    const rows = clipboardData.split(/\r?\n/).filter(r => r.length > 0);
+
+    setLocalEmployees(prev => {
+      const updated = [...prev]; // Shallow copy of array
+
+      rows.forEach((row, rIdx) => {
+        const targetEmpIdx = startEmpIdx + rIdx;
+
+        // Safety check: ensure employee exists
+        if (targetEmpIdx >= updated.length) return;
+
+        const cells = row.split('\t');
+
+        // Deep copy the specific employee we are modifying
+        updated[targetEmpIdx] = { ...updated[targetEmpIdx] };
+
+        // Ensure schedules object exists
+        const schedules = { ...(updated[targetEmpIdx].schedules || {}) };
+        const currentMonthSchedule = [...(schedules[scheduleKey] || Array(31).fill('-'))];
+
+        cells.forEach((cellData, cIdx) => {
+          const targetDayIdx = startDayIdx + cIdx;
+
+          // Safety check: ensure day is within current month range
+          if (targetDayIdx >= daysInMonth) return;
+
+          const cleaned = cellData.trim().toUpperCase();
+          const char = cleaned.length > 0 ? cleaned.slice(-1) : '-';
+
+          currentMonthSchedule[targetDayIdx] = char;
+        });
+
+        updated[targetEmpIdx].schedules = { ...schedules, [scheduleKey]: currentMonthSchedule };
+      });
+
+      return updated;
+    });
+  };
+
   const saveMasterSchedule = () => {
     set(ref(db, 'employees'), localEmployees)
       .then(() => {
@@ -127,14 +171,25 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded border border-white/5">
-        <table className="w-full text-xs border-collapse">
+      <div className="overflow-x-auto rounded-lg border border-slate-300 bg-white shadow-lg">
+        <table className="w-full text-xs border-collapse text-black">
           <thead>
-            <tr className="bg-slate-800/50 text-slate-300 font-bold uppercase tracking-wider">
-              <th className="p-3 border border-slate-700 text-center">S.N</th>
-              <th className="p-3 border border-slate-700 text-left">Employee Name</th>
-              <th className="p-3 border border-slate-700 text-center w-24">Actions</th>
-              {dayArray.map(d => <th key={d} className="p-1 border border-slate-700 min-w-[30px] text-[10px] text-center">{d}</th>)}
+            <tr className="bg-slate-100 text-black font-black uppercase tracking-wider text-sm">
+              <th className="p-2 border-2 border-slate-300 text-center">S.N</th>
+              <th className="p-2 border-2 border-slate-300 text-left">Employee Name</th>
+              <th className="p-2 border-2 border-slate-300 text-center w-24">Actions</th>
+              {dayArray.map(d => {
+                const dateObj = new Date(rosterYear, rosterMonth, d);
+                const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase().slice(0, 3);
+                return (
+                  <th key={d} className="p-1 border-2 border-slate-300 min-w-[32px] text-center bg-slate-50">
+                    <div className="flex flex-col items-center leading-none py-1">
+                      <span className="text-sm font-black">{d}</span>
+                      <span className="text-[9px] text-slate-700 font-bold mt-0.5">{dayName}</span>
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -173,9 +228,9 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
                 return (
                   <React.Fragment key={title}>
                     {/* Section Header */}
-                    <tr className="bg-slate-900/80">
+                    <tr className="bg-slate-200 border-y-2 border-slate-300">
                       <td colSpan={100} className="p-2 text-left">
-                        <span className="text-cyan-400 font-black uppercase tracking-widest text-[10px] border-l-4 border-cyan-500 pl-2">
+                        <span className="text-slate-900 font-black uppercase tracking-widest text-xs border-l-4 border-slate-900 pl-3">
                           {title}
                         </span>
                       </td>
@@ -186,24 +241,24 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
                       const schedule = emp.schedules?.[scheduleKey] || Array(31).fill('-');
                       localSn++;
                       return (
-                        <tr key={emp.id} className="border-b border-white/5 hover:bg-cyan-500/5 transition-colors group text-[10px]">
-                          <td className="p-2 border border-slate-700/30 text-center font-bold text-slate-500">{localSn}</td>
-                          <td className="p-2 border border-slate-700/30 min-w-[150px] font-bold text-slate-300">
+                        <tr key={emp.id} className="border-b-2 border-slate-300 hover:bg-slate-50 transition-colors group text-xs">
+                          <td className="p-1 border-r-2 border-slate-300 text-center font-black text-slate-700">{localSn}</td>
+                          <td className="p-1 border-r-2 border-slate-300 min-w-[150px] font-extrabold text-slate-900">
                             {emp.name}
-                            <span className="block text-[8px] text-slate-500 font-mono">{emp.id}</span>
+                            <span className="block text-[10px] text-slate-600 font-mono font-bold">{emp.id}</span>
                           </td>
-                          <td className="p-2 border border-slate-700/30 text-center">
+                          <td className="p-1 border-r-2 border-slate-300 text-center">
                             <div className="flex justify-center space-x-1">
                               <button
                                 onClick={() => openEditModal(emp)}
-                                className="p-1.5 rounded bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
+                                className="p-1 rounded bg-blue-500/10 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors"
                                 title="Edit Details"
                               >
                                 ✏️
                               </button>
                               <button
                                 onClick={() => handleDeleteEmployee(emp.id, emp.name)}
-                                className="p-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                                className="p-1 rounded bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
                                 title="Delete Employee"
                               >
                                 🗑️
@@ -214,14 +269,15 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
                             const val = schedule[day - 1] || '-';
                             const isRest = val === 'R';
                             return (
-                              <td key={day} className={`p-0 border border-slate-700/30 min-w-[30px] ${isRest ? 'bg-red-900/40' : ''}`}>
+                              <td key={day} className={`p-0 border-r-2 border-slate-300 min-w-[32px] ${isRest ? 'bg-red-600' : ''}`}>
                                 <input
                                   type="text"
                                   disabled={!isScheduleEditing}
                                   value={val}
                                   onFocus={(e) => isScheduleEditing && e.target.select()}
                                   onChange={(e) => updateMasterScheduleCell(localEmployees.findIndex(l => l.id === emp.id), day - 1, e.target.value)}
-                                  className={`w-full h-full bg-transparent text-center font-black ${isRest ? 'text-white' : 'text-slate-400'} focus:bg-cyan-900/30 focus:text-cyan-300 focus:outline-none uppercase ${!isScheduleEditing ? 'cursor-not-allowed select-none' : 'cursor-text bg-slate-900/30'}`}
+                                  onPaste={(e) => handlePaste(e, localEmployees.findIndex(l => l.id === emp.id), day - 1)}
+                                  className={`w-full h-full bg-transparent text-center font-black text-xs ${isRest ? 'text-white' : 'text-slate-900'} focus:bg-blue-100 focus:text-blue-900 focus:outline-none uppercase ${!isScheduleEditing ? 'cursor-not-allowed select-none' : 'cursor-text bg-slate-50'}`}
                                 />
                               </td>
                             );
@@ -249,6 +305,15 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
 
                   {/* Others Restart S.N at 0 */}
                   {renderAdminSection("Others", groupOthers, 0)}
+
+                  {/* Disclaimer Footer */}
+                  <tr className="bg-white border-t-4 border-slate-900">
+                    <td colSpan={100} className="p-3 text-center">
+                      <span className="text-black font-black text-sm uppercase tracking-[0.2em]">
+                        NOBODY CHANGE SHIFT AND REST WITHOUT PERMISSION
+                      </span>
+                    </td>
+                  </tr>
                 </>
               );
             })()}
