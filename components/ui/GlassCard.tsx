@@ -9,7 +9,7 @@ interface GlassCardProps {
 
 const GlassCard: React.FC<GlassCardProps> = ({ children, className = '', title, icon }) => {
     return (
-        <div className={`relative group overflow-hidden rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-white/5 shadow-2xl ${className}`}>
+        <div className={`relative group overflow-hidden rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-white/5 shadow-2xl neon-pulse ${className}`}>
 
             {/* Decorative Gradients */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all duration-700 pointer-events-none"></div>

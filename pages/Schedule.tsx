@@ -3,6 +3,7 @@ import { Employee } from '../types';
 import MasterSchedule from '../components/admin/MasterSchedule';
 import GlassCard from '../components/ui/GlassCard';
 
+
 interface ScheduleProps {
   employees: Employee[];
   rosterMonth: number;
@@ -21,7 +22,7 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, rosterMonth, rosterY
     "Rohit Kumar-I", "Ravi Kumar", "Susheel Yadav", "Kamlesh Yadav",
     "Om Shankar Yadav", "Vijendra Singh", "Kulwant Singh"
   ];
-  const generalOpNames = ["Yash Kumar", "Rohit Kumar-II"];
+  const generalOpNames = ["Yash Kumar", "Rohit Kumar-II", "Arvind Kumar"];
   const supervisorNames = ["Lakhvinder Singh", "Prateek Yadav", "Pradeep Shukla", "Amit Nagarale"];
   const inchargeNames = ["Bhupendra Kumar"];
 
@@ -87,11 +88,14 @@ const SchedulePage: React.FC<ScheduleProps> = ({ employees, rosterMonth, rosterY
 
       {/* Admin Editor (Only visible if Admin) */}
       {isAdmin && (
-        <MasterSchedule
-          employees={employees}
-          rosterMonth={rosterMonth}
-          rosterYear={rosterYear}
-        />
+        <div className="space-y-8">
+
+          <MasterSchedule
+            employees={employees}
+            rosterMonth={rosterMonth}
+            rosterYear={rosterYear}
+          />
+        </div>
       )}
 
       {/* Public Read-Only Master Table */}

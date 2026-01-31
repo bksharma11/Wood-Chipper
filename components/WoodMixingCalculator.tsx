@@ -9,6 +9,8 @@ const calculateBuckets = (percentage: number) => {
     return { mix: mixBuckets, safeda: safedaBuckets };
 };
 
+
+
 const formatBucketCount = (count: number) => {
     // Round to 1 decimal place to avoid floating point errors like 1.50000001
     const rounded = Math.round(count * 10) / 10;
@@ -80,9 +82,12 @@ const WoodMixingCalculator: React.FC = () => {
 
         return (
             <div className="bg-slate-900/40 p-2 rounded-lg border border-slate-700/50">
-                <h4 className="text-cyan-400 font-bold uppercase tracking-widest text-xs mb-1 border-b border-cyan-500/20 pb-1">
-                    {label}
-                </h4>
+                <div className="flex justify-between items-center mb-1 border-b border-cyan-500/20 pb-1">
+                    <h4 className="text-cyan-400 font-bold uppercase tracking-widest text-xs">
+                        {label}
+                    </h4>
+
+                </div>
 
                 {data.type !== 'MIXED' ? (
                     <div className="text-lg font-black text-white orbitron py-2 text-center text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]">

@@ -109,6 +109,8 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
   const updateMonth = (val: number) => set(ref(db, 'rosterMonth'), val).catch(handleFirebaseError);
   const updateYear = (val: number) => set(ref(db, 'rosterYear'), val).catch(handleFirebaseError);
 
+
+
   return (
     <GlassCard>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -142,7 +144,7 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
                 "Rohit Kumar-I", "Ravi Kumar", "Susheel Yadav", "Kamlesh Yadav",
                 "Om Shankar Yadav", "Vijendra Singh", "Kulwant Singh"
               ];
-              const generalOpNames = ["Yash Kumar", "Rohit Kumar-II"];
+              const generalOpNames = ["Yash Kumar", "Rohit Kumar-II", "Arvind Kumar"];
               const supervisorNames = ["Lakhvinder Singh", "Prateek Yadav", "Pradeep Shukla", "Amit Nagarale"];
               const inchargeNames = ["Bhupendra Kumar"];
 
@@ -273,6 +275,7 @@ const MasterSchedule: React.FC<MasterScheduleProps> = ({ employees, rosterMonth,
             SAVE SCHEDULE CHANGES
           </GlassButton>
         )}
+
       </div>
 
       {/* Edit Employee Modal */}

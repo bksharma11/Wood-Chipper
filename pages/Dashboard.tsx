@@ -9,6 +9,9 @@ import LeaveRequestSystem from '../components/LeaveRequestSystem';
 import ShiftSwapRequestSystem from '../components/ShiftSwapRequestSystem';
 import RequestStatusViewer from '../components/RequestStatusViewer';
 import GlassCard from '../components/ui/GlassCard';
+import HologramBackground from '../components/ui/HologramBackground';
+import SentinelTerminal from '../components/ui/SentinelTerminal';
+import HUDOverlay from '../components/ui/HUDOverlay';
 
 import WoodMixingCalculator from '../components/WoodMixingCalculator';
 
@@ -284,7 +287,9 @@ const Dashboard: React.FC<DashboardProps> = ({ employees, notifications, leaveRe
         .animate-marquee { animation: marquee 30s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
       `}</style>
-            <div className="fixed inset-0 cyber-grid z-[-1] opacity-30 pointer-events-none"></div>
+            <HologramBackground />
+            <SentinelTerminal />
+            <HUDOverlay />
             <div className="fixed inset-0 scanlines z-[-1] opacity-50 pointer-events-none"></div>
         </div>
     );
